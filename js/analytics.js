@@ -1,1 +1,128 @@
-function a0_0x49d7(){const _0x3c464b=['mZaWota1mLfvtvbcCq','yvTOCMvMkJ0ID2eUBwuIxq','Aw5PDa','D2fdBgLJA3m','DMLZAxrZtg9N','Dg9tDhjPBMC','Cgf0Ag5HBwu','rxjYB3iGCMvHzgLUzYbHBMfSExrPy3m6','BNvTzxjPyW','rgLYzwn0','DhjHy2TwAxnPDa','D2fFy2XPy2S','Dg90ywXwAxnPDhm','ywrKrxzLBNrmAxn0zw5LCG','Aw5UzxjizwLNAhq','CMvMzxjYzxi','CxvLCNLtzwXLy3rVCKfSBa','ndaWmJuZD2LAt2j0','mtbzwvjXueS','ChjVx3bVCNrMB2XPB192Dg9Rzw4','C2f2zufUywX5DgLJC0rHDge','y2fSy1vZzxm','Dw5ZAgLMDa','BgvUz3rO','mZiWmJmYnu1pB1zzsG','Bg9NxW','re9nq29UDgvUDeXVywrLza','lNbYB2PLy3qTCgXHEs1IDg4','mZaZntu1mKzSC2jIqG','Dg9mB2nHBgvuAw1Lu3rYAw5N','mI1KAwDPDa','DMLKzw9FCgXHEq','zw5KC1DPDgG','Dg9ju09tDhjPBMC','tw9IAwXL','owfLANLsuW','mtm2mtruEhv3zei','zM9YrwfJAa','DgvZDa','C3vIC3rYAw5N','DgfYz2v0','yxiTruC','mZa2tKflCurS','DxnLCKfNzw50','C2v0sxrLBq','y2fSy191C2u','z2v0sxrLBq','mteYmZCXnZbHu3D2AKu','Dw5PCxvLvMLZAxrVCNm','rgvZA3rVCa','BM93','BgfUz3vHz2u','y2XPy2S','DMLZxW','DhjHy2Tby3rPB24','CMfUzg9T','z2v0rgv2AwnLvhLWzq','CgfYC2u','mteYodiZnfLpq1zXAq','y2XVC2vZDa','C3rYAw5NAwz5','DMLKzw9qBgf5CW','ChjVx3bVCNrMB2XPB19HBMfSExrPy3m','lNbYB2PLy3qTy2fYza','z2v0qw5HBhL0AwnZrgf0yq','rxjYB3iGC2f2Aw5NigfUywX5DgLJCZO'];a0_0x49d7=function(){return _0x3c464b;};return a0_0x49d7();}const a0_0x163e06=a0_0x5e39;(function(_0x1b5ebc,_0x3b9d26){const _0x1abbee=a0_0x5e39,_0x21e6c5=_0x1b5ebc();while(!![]){try{const _0x1a9d9b=parseInt(_0x1abbee(0x1e5))/0x1+parseInt(_0x1abbee(0x1fe))/0x2*(-parseInt(_0x1abbee(0x1f8))/0x3)+-parseInt(_0x1abbee(0x216))/0x4+-parseInt(_0x1abbee(0x1e6))/0x5*(-parseInt(_0x1abbee(0x20e))/0x6)+parseInt(_0x1abbee(0x1ec))/0x7+-parseInt(_0x1abbee(0x1f0))/0x8+parseInt(_0x1abbee(0x1f7))/0x9*(parseInt(_0x1abbee(0x203))/0xa);if(_0x1a9d9b===_0x3b9d26)break;else _0x21e6c5['push'](_0x21e6c5['shift']());}catch(_0x45ea47){_0x21e6c5['push'](_0x21e6c5['shift']());}}}(a0_0x49d7,0x81c2e));const AnalyticsEngine={'init'(){const _0x101cca=a0_0x5e39;this[_0x101cca(0x220)](),this['setupActionTrackers']();},'getAnalyticsData'(){const _0x3543f5=a0_0x5e39;try{const _0x4cc919=localStorage[_0x3543f5(0x202)](_0x3543f5(0x212));if(_0x4cc919)return JSON[_0x3543f5(0x20d)](_0x4cc919);}catch(_0x49935a){console['error'](_0x3543f5(0x21d),_0x49935a);}return{'totalVisits':0x0,'uniqueVisitors':0x0,'returningVisits':0x0,'waClicks':0x0,'calcUses':0x0,'videoPlays':0x0,'visitsLog':[]};},'saveAnalyticsData'(_0x75471f){const _0x3124a4=a0_0x5e39;try{_0x75471f['visitsLog']&&_0x75471f[_0x3124a4(0x21a)][_0x3124a4(0x1eb)]>0x96&&(_0x75471f[_0x3124a4(0x21a)]=_0x75471f['visitsLog']['slice'](0x0,0x96)),localStorage[_0x3124a4(0x200)](_0x3124a4(0x212),JSON[_0x3124a4(0x210)](_0x75471f));}catch(_0x1d5dc7){console['error'](_0x3124a4(0x215),_0x1d5dc7);}},'trackVisit'(){const _0x15c5d7=a0_0x5e39,_0x121d26=this[_0x15c5d7(0x214)](),_0x1153f6=localStorage[_0x15c5d7(0x202)](_0x15c5d7(0x1e7)),_0x3488a8=new Date(),_0x424854=Boolean(_0x1153f6);let _0x72e88c=_0x1153f6;!_0x1153f6?(_0x72e88c=_0x15c5d7(0x209)+Math[_0x15c5d7(0x20b)]()[_0x15c5d7(0x21b)](0x24)[_0x15c5d7(0x1fb)](0x2,0x9)+Date[_0x15c5d7(0x206)]()[_0x15c5d7(0x21b)](0x24),localStorage[_0x15c5d7(0x200)](_0x15c5d7(0x1e7),_0x72e88c),_0x121d26[_0x15c5d7(0x204)]=(_0x121d26[_0x15c5d7(0x204)]||0x0)+0x1):_0x121d26['returningVisits']=(_0x121d26['returningVisits']||0x0)+0x1;_0x121d26[_0x15c5d7(0x222)]=(_0x121d26[_0x15c5d7(0x222)]||0x0)+0x1;const _0x2915a4={'id':_0x15c5d7(0x1ed)+Date[_0x15c5d7(0x206)](),'visitorId':_0x72e88c,'isReturning':_0x424854,'device':this[_0x15c5d7(0x20c)](),'screen':window['innerWidth']+'x'+window[_0x15c5d7(0x1e2)],'language':navigator[_0x15c5d7(0x207)]||'ar','referrer':document[_0x15c5d7(0x1e3)]?new URL(document[_0x15c5d7(0x1e3)])['hostname']:_0x15c5d7(0x21f),'timestamp':_0x3488a8[_0x15c5d7(0x1f5)](),'timeFormatted':_0x3488a8[_0x15c5d7(0x1f1)]('ar-EG',{'hour':_0x15c5d7(0x1f2),'minute':'2-digit'}),'dateFormatted':_0x3488a8['toLocaleDateString'](_0x15c5d7(0x1fd),{'month':'short','day':_0x15c5d7(0x21e)})};if(!_0x121d26[_0x15c5d7(0x21a)])_0x121d26[_0x15c5d7(0x21a)]=[];_0x121d26[_0x15c5d7(0x21a)][_0x15c5d7(0x1ea)](_0x2915a4),this[_0x15c5d7(0x1e8)](_0x121d26);},'trackAction'(_0x5ab628){const _0xf21ccf=a0_0x5e39,_0xfc6e97=this[_0xf21ccf(0x214)]();if(_0x5ab628===_0xf21ccf(0x221))_0xfc6e97['waClicks']=(_0xfc6e97[_0xf21ccf(0x219)]||0x0)+0x1;else{if(_0x5ab628===_0xf21ccf(0x201))_0xfc6e97[_0xf21ccf(0x1e9)]=(_0xfc6e97['calcUses']||0x0)+0x1;else _0x5ab628==='video_play'&&(_0xfc6e97[_0xf21ccf(0x211)]=(_0xfc6e97[_0xf21ccf(0x211)]||0x0)+0x1);}this[_0xf21ccf(0x1e8)](_0xfc6e97);},'setupActionTrackers'(){const _0x56a6df=a0_0x5e39;document[_0x56a6df(0x1e4)](_0x56a6df(0x217))[_0x56a6df(0x1f9)](_0x174d47=>{const _0x4a4324=_0x56a6df;_0x174d47['addEventListener'](_0x4a4324(0x208),()=>{const _0x54c5ad=_0x4a4324;this[_0x54c5ad(0x20a)](_0x54c5ad(0x221));});}),document[_0x56a6df(0x1e1)](_0x56a6df(0x208),_0x1da020=>{const _0x4b8198=_0x56a6df;(_0x1da020['target'][_0x4b8198(0x20f)](_0x4b8198(0x213))||_0x1da020[_0x4b8198(0x1fc)]['closest'](_0x4b8198(0x1ef)))&&this['trackAction'](_0x4b8198(0x1f3));});},'getDeviceType'(){const _0x5f1bc5=a0_0x5e39,_0x397a25=navigator[_0x5f1bc5(0x1ff)];if(/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i[_0x5f1bc5(0x1fa)](_0x397a25))return'Tablet';if(/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/[_0x5f1bc5(0x1fa)](_0x397a25))return _0x5f1bc5(0x1f6);return _0x5f1bc5(0x205);}};function a0_0x5e39(_0x267fee,_0x67b366){_0x267fee=_0x267fee-0x1e1;const _0x49d719=a0_0x49d7();let _0x5e39d3=_0x49d719[_0x267fee];if(a0_0x5e39['TvyBvQ']===undefined){var _0x5eccb9=function(_0x354338){const _0x17d1b2='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x604b91='',_0x4cc919='';for(let _0x49935a=0x0,_0x75471f,_0x1d5dc7,_0x121d26=0x0;_0x1d5dc7=_0x354338['charAt'](_0x121d26++);~_0x1d5dc7&&(_0x75471f=_0x49935a%0x4?_0x75471f*0x40+_0x1d5dc7:_0x1d5dc7,_0x49935a++%0x4)?_0x604b91+=String['fromCharCode'](0xff&_0x75471f>>(-0x2*_0x49935a&0x6)):0x0){_0x1d5dc7=_0x17d1b2['indexOf'](_0x1d5dc7);}for(let _0x1153f6=0x0,_0x3488a8=_0x604b91['length'];_0x1153f6<_0x3488a8;_0x1153f6++){_0x4cc919+='%'+('00'+_0x604b91['charCodeAt'](_0x1153f6)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x4cc919);};a0_0x5e39['oJWJZu']=_0x5eccb9,a0_0x5e39['QyTygc']={},a0_0x5e39['TvyBvQ']=!![];}const _0x51ed13=_0x49d719[0x0];a0_0x5e39['JNjEHB']!==_0x51ed13&&(a0_0x5e39['QyTygc']={},a0_0x5e39['JNjEHB']=_0x51ed13);const _0x475b7f=a0_0x5e39['QyTygc'][_0x267fee];return _0x475b7f===undefined?(_0x5e39d3=a0_0x5e39['oJWJZu'](_0x5e39d3),a0_0x5e39['QyTygc'][_0x267fee]=_0x5e39d3):_0x5e39d3=_0x475b7f,_0x5e39d3;}document[a0_0x163e06(0x1e1)](a0_0x163e06(0x1ee),()=>{const _0xda10e5=a0_0x163e06;!window['location'][_0xda10e5(0x21c)][_0xda10e5(0x1f4)]('admin.html')&&AnalyticsEngine[_0xda10e5(0x218)]();});
+/**
+ * ============================================================================
+ * Pro Portfolio - Smart Visitor Analytics & Traffic Engine
+ * ============================================================================
+ * Zero-cost, privacy-friendly visitor intelligence engine.
+ * Distinguishes between New vs. Returning visitors, tracks devices,
+ * and monitors customer conversion actions (WhatsApp Clicks, Calculator uses).
+ */
+
+const AnalyticsEngine = {
+    init() {
+        this.trackVisit();
+        this.setupActionTrackers();
+    },
+
+    getAnalyticsData() {
+        try {
+            const raw = localStorage.getItem('pro_portfolio_analytics');
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.error("Error reading analytics:", e);
+        }
+        return {
+            totalVisits: 0,
+            uniqueVisitors: 0,
+            returningVisits: 0,
+            waClicks: 0,
+            calcUses: 0,
+            videoPlays: 0,
+            visitsLog: []
+        };
+    },
+
+    saveAnalyticsData(data) {
+        try {
+            // Keep recent 150 visits in log for optimal performance
+            if (data.visitsLog && data.visitsLog.length > 150) {
+                data.visitsLog = data.visitsLog.slice(0, 150);
+            }
+            localStorage.setItem('pro_portfolio_analytics', JSON.stringify(data));
+        } catch (e) {
+            console.error("Error saving analytics:", e);
+        }
+    },
+
+    trackVisit() {
+        const data = this.getAnalyticsData();
+        const visitorToken = localStorage.getItem('pro_portfolio_vtoken');
+        const now = new Date();
+        const isReturning = Boolean(visitorToken);
+
+        let visitorId = visitorToken;
+        if (!visitorToken) {
+            visitorId = 'vis_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+            localStorage.setItem('pro_portfolio_vtoken', visitorId);
+            data.uniqueVisitors = (data.uniqueVisitors || 0) + 1;
+        } else {
+            data.returningVisits = (data.returningVisits || 0) + 1;
+        }
+
+        data.totalVisits = (data.totalVisits || 0) + 1;
+
+        // Session entry
+        const visitEntry = {
+            id: 'log_' + Date.now(),
+            visitorId: visitorId,
+            isReturning: isReturning,
+            device: this.getDeviceType(),
+            screen: `${window.innerWidth}x${window.innerHeight}`,
+            language: navigator.language || 'ar',
+            referrer: document.referrer ? new URL(document.referrer).hostname : 'Direct',
+            timestamp: now.toISOString(),
+            timeFormatted: now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+            dateFormatted: now.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })
+        };
+
+        if (!data.visitsLog) data.visitsLog = [];
+        data.visitsLog.unshift(visitEntry);
+
+        this.saveAnalyticsData(data);
+    },
+
+    trackAction(actionType) {
+        const data = this.getAnalyticsData();
+        if (actionType === 'wa_click') {
+            data.waClicks = (data.waClicks || 0) + 1;
+        } else if (actionType === 'calc_use') {
+            data.calcUses = (data.calcUses || 0) + 1;
+        } else if (actionType === 'video_play') {
+            data.videoPlays = (data.videoPlays || 0) + 1;
+        }
+        this.saveAnalyticsData(data);
+    },
+
+    setupActionTrackers() {
+        // Track all WhatsApp buttons
+        document.querySelectorAll('a[href*="wa.me"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.trackAction('wa_click');
+            });
+        });
+
+        // Track video play clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.project-card') || e.target.closest('.project-play-btn')) {
+                this.trackAction('video_play');
+            }
+        });
+    },
+
+    getDeviceType() {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+            return 'Tablet';
+        }
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+            return 'Mobile';
+        }
+        return 'Desktop';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Only track if not currently viewing admin panel
+    if (!window.location.pathname.endsWith('admin.html')) {
+        AnalyticsEngine.init();
+    }
+});

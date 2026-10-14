@@ -136,11 +136,11 @@ const DEFAULT_CONFIG = {
         adminEmail: "admin@example.com",
         pinCode: "123456",
         recoveryPhone: "201000000000",
+        masterKey: "SALAH-MASTER-2026",
         authorizedDomains: ["localhost", "127.0.0.1"],
         licenseKey: "",
         clientEmail: "",
-        allowFooterRemoval: true,
-        licenseType: "whitelabel"
+        allowFooterRemoval: false
     }
 };
 
@@ -550,7 +550,54 @@ function isObject(item) {
 }
 
 // ----------------------------------------------------------------------------
-// ============================================================================\n// Core Navigation & Section Engine\n// ============================================================================\n// Reusable Dynamic Navbar Generator (Supports Dropdowns & Store Switch)
+// Cryptographic Licensing & Anti-Theft Verification Engine (Creative Portfolio 2026)
+// ----------------------------------------------------------------------------
+const SALAH_MASTER_SALT = "SALAH_PRO_STUDIO_SALT_2026";
+
+function computeLicenseHash(domain, flag) {
+    const str = `${(domain || '').trim().toLowerCase()}_${flag || 'F0'}_${SALAH_MASTER_SALT}`;
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    const hex1 = Math.abs(h1).toString(16).toUpperCase().padStart(8, '0');
+    const hex2 = Math.abs(h2).toString(16).toUpperCase().padStart(8, '0');
+    return (hex1 + hex2).slice(0, 12);
+}
+
+function generateLicenseKey(domain, allowFooter) {
+    const cleanDomain = (domain || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const flag = allowFooter ? 'F1' : 'F0';
+    const sig = computeLicenseHash(cleanDomain, flag);
+    return `PRO-${cleanDomain}-${flag}-${sig}`;
+}
+
+function verifyLicenseKey(key, currentHost) {
+    if (!key || typeof key !== 'string') return { valid: false, allowFooter: false };
+    const parts = key.trim().split('-');
+    if (parts.length < 4 || parts[0] !== 'PRO') return { valid: false, allowFooter: false };
+    
+    // In case domain itself contained hyphens (e.g., PRO-my-site.github.io-F0-SIG)
+    const sig = parts[parts.length - 1];
+    const flag = parts[parts.length - 2];
+    const licDomain = parts.slice(1, parts.length - 2).join('-').toLowerCase();
+
+    const expectedSig = computeLicenseHash(licDomain, flag);
+    if (sig !== expectedSig) return { valid: false, allowFooter: false };
+
+    const cleanHost = (currentHost || '').toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (cleanHost !== licDomain && !cleanHost.endsWith('.' + licDomain)) {
+        return { valid: false, allowFooter: false, domainMismatch: true, licDomain };
+    }
+    return { valid: true, allowFooter: (flag === 'F1'), licDomain };
+}
+
+// ----------------------------------------------------------------------------
+// Reusable Dynamic Navbar Generator (Supports Dropdowns & Store Switch)
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // Section Visibility & State Guard (Controls all site sections with 1-click 👁️)
@@ -644,4 +691,220 @@ function applySectionVisibility() {
     }
 }
 
-// ----------------------------------------------------------------------------\n\n// ============================================================================\n// [PROTECTED] Anti-Theft Guard & Cryptographic Verification Engine (C) 2026\n// ============================================================================\nconst a0_0x582967=a0_0x5e62;function a0_0x5e62(_0xb9711f,_0x4d5e8f){_0xb9711f=_0xb9711f-0x173;const _0x54f2fc=a0_0x54f2();let _0x5e622b=_0x54f2fc[_0xb9711f];if(a0_0x5e62['hFCTXH']===undefined){var _0x34de36=function(_0x28a29d){const _0x9bb99b='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x4beacd='',_0x2b155b='';for(let _0x4fcef3=0x0,_0x303aa7,_0x43c973,_0x2ec261=0x0;_0x43c973=_0x28a29d['charAt'](_0x2ec261++);~_0x43c973&&(_0x303aa7=_0x4fcef3%0x4?_0x303aa7*0x40+_0x43c973:_0x43c973,_0x4fcef3++%0x4)?_0x4beacd+=String['fromCharCode'](0xff&_0x303aa7>>(-0x2*_0x4fcef3&0x6)):0x0){_0x43c973=_0x9bb99b['indexOf'](_0x43c973);}for(let _0x337ae2=0x0,_0xf2e542=_0x4beacd['length'];_0x337ae2<_0xf2e542;_0x337ae2++){_0x2b155b+='%'+('00'+_0x4beacd['charCodeAt'](_0x337ae2)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x2b155b);};a0_0x5e62['AsPbDD']=_0x34de36,a0_0x5e62['aQPRqs']={},a0_0x5e62['hFCTXH']=!![];}const _0x189ca8=_0x54f2fc[0x0];a0_0x5e62['YhSsfu']!==_0x189ca8&&(a0_0x5e62['aQPRqs']={},a0_0x5e62['YhSsfu']=_0x189ca8);const _0x256e8f=a0_0x5e62['aQPRqs'][_0xb9711f];return _0x256e8f===undefined?(_0x5e622b=a0_0x5e62['AsPbDD'](_0x5e622b),a0_0x5e62['aQPRqs'][_0xb9711f]=_0x5e622b):_0x5e622b=_0x256e8f,_0x5e622b;}(function(_0x1dad84,_0xc801d8){const _0x1bbea9=a0_0x5e62,_0x3df6fd=_0x1dad84();while(!![]){try{const _0x28fdc5=-parseInt(_0x1bbea9(0x1c2))/0x1+parseInt(_0x1bbea9(0x191))/0x2+parseInt(_0x1bbea9(0x1c8))/0x3+-parseInt(_0x1bbea9(0x1d9))/0x4+parseInt(_0x1bbea9(0x1ba))/0x5+-parseInt(_0x1bbea9(0x1ca))/0x6+parseInt(_0x1bbea9(0x1a0))/0x7;if(_0x28fdc5===_0xc801d8)break;else _0x3df6fd['push'](_0x3df6fd['shift']());}catch(_0x546d48){_0x3df6fd['push'](_0x3df6fd['shift']());}}}(a0_0x54f2,0xb2d9e));const SALAH_MASTER_SALT=a0_0x582967(0x188);function computeLicenseHash(_0x49f2b5,_0x27be53){const _0x157021=a0_0x582967,_0x2fe21f={'sVhkG':function(_0x5b148c,_0x389866){return _0x5b148c+_0x389866;},'ugWrL':function(_0x446dac,_0xfedc0a){return _0x446dac||_0xfedc0a;},'CZFyQ':function(_0x42f9d7,_0x5b22bd){return _0x42f9d7^_0x5b22bd;},'YIXMB':function(_0x3c497f,_0x5c694c){return _0x3c497f>>>_0x5c694c;},'UFdJi':function(_0x17c3d6,_0x5345d8){return _0x17c3d6^_0x5345d8;},'xCdVp':function(_0x599097,_0xf5204c){return _0x599097>>>_0xf5204c;}},_0x8f966d=_0x2fe21f[_0x157021(0x1c4)]((_0x49f2b5||'')[_0x157021(0x1ae)]()[_0x157021(0x1b8)]()+'_'+_0x2fe21f[_0x157021(0x1ab)](_0x27be53,'F0')+'_',SALAH_MASTER_SALT);let _0x13afe2=0xdeadbeef,_0x47ca25=0x41c6ce57;for(let _0x58ae1a=0x0;_0x58ae1a<_0x8f966d[_0x157021(0x19a)];_0x58ae1a++){const _0x335eaf=_0x8f966d[_0x157021(0x1a4)](_0x58ae1a);_0x13afe2=Math[_0x157021(0x1ad)](_0x2fe21f[_0x157021(0x1b9)](_0x13afe2,_0x335eaf),0x9e3779b1),_0x47ca25=Math['imul'](_0x47ca25^_0x335eaf,0x5f356495);}_0x13afe2=_0x2fe21f[_0x157021(0x1b9)](Math[_0x157021(0x1ad)](_0x2fe21f[_0x157021(0x1b9)](_0x13afe2,_0x2fe21f[_0x157021(0x199)](_0x13afe2,0x10)),0x85ebca6b),Math[_0x157021(0x1ad)](_0x2fe21f[_0x157021(0x18b)](_0x47ca25,_0x2fe21f[_0x157021(0x1b5)](_0x47ca25,0xd)),0xc2b2ae35)),_0x47ca25=_0x2fe21f[_0x157021(0x1b9)](Math['imul'](_0x47ca25^_0x2fe21f[_0x157021(0x1b5)](_0x47ca25,0x10),0x85ebca6b),Math[_0x157021(0x1ad)](_0x2fe21f[_0x157021(0x1b9)](_0x13afe2,_0x2fe21f[_0x157021(0x199)](_0x13afe2,0xd)),0xc2b2ae35));const _0x3ac972=Math[_0x157021(0x196)](_0x13afe2)[_0x157021(0x1d3)](0x10)['toUpperCase']()[_0x157021(0x187)](0x8,'0'),_0x1757c8=Math[_0x157021(0x196)](_0x47ca25)[_0x157021(0x1d3)](0x10)[_0x157021(0x179)]()['padStart'](0x8,'0');return(_0x3ac972+_0x1757c8)[_0x157021(0x180)](0x0,0xc);}function generateLicenseKey(_0x3fa716,_0x23c0cf){const _0x5d6377=a0_0x582967,_0x5bb53e={'NZEYF':function(_0x34ec2e,_0x2593cf,_0x14ab18){return _0x34ec2e(_0x2593cf,_0x14ab18);}},_0x1d8018=(_0x3fa716||'')[_0x5d6377(0x1ae)]()[_0x5d6377(0x1b8)]()['replace'](/^https?:\/\//,'')['replace'](/\/$/,''),_0x4dd3f5=_0x23c0cf?'F1':'F0',_0x3299a8=_0x5bb53e['NZEYF'](computeLicenseHash,_0x1d8018,_0x4dd3f5);return'PRO-'+_0x1d8018+'-'+_0x4dd3f5+'-'+_0x3299a8;}function a0_0x54f2(){const _0x31ea95=['D1LTsxi','pc9HpG','C2vJDxjPDhK','DMfSAwq','zfbPvva','DwDxCKW','ywXSB3DgB290zxjszw1VDMfS','Aw11Ba','DhjPBq','w0fUDgKTvgHLzNqGr3vHCMrDifvUyxv0Ag9YAxPLzcbKB21HAw4Gka','ugHKtKK','AgLKzgvU','iIb0yxjNzxq9iL9IBgfUAYiGC3r5Bgu9iMrPC3bSyxK6igzSzxG7igfSAwDUlwL0zw1ZoIbJzw50zxi7igP1C3rPzNKTy29UDgvUDdOGy2vUDgvYoYbNyxa6idaUnNjLBtSGyMfJA2DYB3vUzdOGiZi1rdm2nJSGy29SB3i6icnMzMy7ihbHzgrPBMC6idaUoxjLBsaXlJvYzw07igjVCMrLCI1YywrPDxm6idK5otLWEdSGzM9UDc13zwLNAhq6idGWmdSGDgv4Dc1KzwnVCMf0Aw9UoIbUB25LoYbMB250lxnPEMu6idfYzw07igjVEc1ZAgfKB3C6idaGnhb4ide1ChGGCMDIysGZnYWYmteSmtaYldaUmYK7iJ4','pgrPDIbZDhLSzt0IBwfYz2LUlxrVCdOGms41CMvToYbMB250lxnPEMu6idaUnZHYzw07ignVBg9YoIaJnMi3mJGWoYi+u2vJDxjLieXPy2vUC2LUzYbtExn0zw0GWQKGmJaYnIdIGkiG2kJySDMf2kZyQsdzInIQ2lFzInMk2leG2k7yP9I1pc9KAxy+','pgKGy2XHC3m9iMzHlxnVBgLKigzHlwXVy2SIpJWVAt4','EenKvNa','D2LRDvO','zxvZqNi','Dg9mB3DLCKnHC2u','q1PgEve','mZaXmta1ANPOuxH3','yw50AvrOzwz0tg9JA092zxjSyxK','r1bzuvG','pgGYihn0EwXLpsjJB2XVCJOGi2zMzJSGzM9UDc1ZAxPLoIaXlJvYzw07igzVBNqTD2vPz2H0oIa4mda7ig1HCMDPBI1IB3r0B206idaUnxjLBtSIpTMh2ldyPYdyP9Me2ylyP9Me2kGG2yRyQTI32ytyQcdyQTMb2lNzITMeinIN2ytyQTIX2k7zITI1inIN2ytySDIZ2yxzIJWVAdi+','pc9ZDhjVBMC+icJyUTMk2leG2yxySDIU2luG2kpzIcdzHDMg2lpzInIUinIO2k/zInMginIQ2lhyRTMk2luP','yu1pA2G','BgLJzw5Zzwq','zgvwt1e','ndm2nJa2D2fPAxPs','q3jHzNrLzcb3AxrOihbLywSGCgvYzM9YBwfUy2uGyNKGu2fSywGGWQKGmJaYnI4','C1zOA0C','C1zsEMG','tvPbqxm','tun2q2u','mZe0mJm0muvWANzQCW','Bejttey','mZm1ndeZoejTwgHOEa','2kFzHnIV2yJzHDMk2yyG2kFzHnIT2kFzHnMkoIa8C3rYB25NpG','ufjp','ywXSB3DgB290zxi','y3jLyxrLrwXLBwvUDa','Cg9ZAxrPB246igzPEgvKoYbPBNnLDdOGmdSGEI1PBMrLEdOGotK5otK5otSGyMfJA2DYB3vUzdOGCMDIysG1lca1lca4lcaWlJK0ktSGyMfJA2rYB3aTzMLSDgvYoIbIBhvYkdi1ChGPoYbKAxnWBgf5oIbMBgv4oYbHBgLNBI1PDgvTCZOGy2vUDgvYoYbQDxn0Awz5lwnVBNrLBNq6ignLBNrLCJSGCgfKzgLUzZOGms41CMvToYbMB250lwzHBwLSEtOGq2fPCM8Sihn5C3rLBs11AsWGC2fUCY1ZzxjPzJSGzgLYzwn0Aw9UoIbYDgW7','2kRzHsdyRDMf2kFzITIPinMh2ldyPYdyP9Me2yxzInMc2lKG2kJzHTI42kFzHsa8C3rYB25NpKnYzwf0AxzLiefUDgKTvgHLzNqGr3vHCMq8l3n0CM9UzZ4UinMe2kRyTnI62yRzHcdyP9Me2yxzInMc2lKG2lNzHnMjinMh2ldyPYdyP9Me2k/zInMf2yRzHIdzITMe2llzHsdyPDIV2k7yP9MeinMd2yJyRYdyP9Me2kRySDIU2yRyTsdyP9Me2lhyS9Mf2yOG2kFzHnMf2lNyQTMf2k8G2yxzHIdyP9Me2yxyT9Mi2leGknI12ytyP9ITks4','ufz4AMy','DujJrva','Dg9tDhjPBMC','Aw5JBhvKzxm','zxLtwMO','sxz6DM8','z2H5suO','ve5kqLe','mZy4nty0ngjJs3DyuG','DwzRwfO','qMjVEKS','C2LvB2q','Dvj4CKS','Aw5Uzxjive1m','pc9WpG','2yxySDIT2kJyP9Ml2iWG2kpzInIVinIQ2yhyUDMk2yqG2kRySDIU2yRyTsdySDIZ2yxzIIdzHnMe2ylyP9Me2kGG2lNzHnMjinIN2ytyR9Mi2yxzITMgoIa','ww5Wt00','pgrPDIbZDhLSzt0ID2LKDgG6idCYChG7igHLAwDODdOGnZjWEdSGyM9YzgvYlxjHzgL1CZOGntaLoYbIywnRz3jVDw5KoIbYz2jHkdiZosWGnJGSidy4lcaWlJe1ktSGyM9YzgvYoIaXChGGC29SAwqGCMDIysGYmZKSidy4lca2ocWGmc40ktSGy29SB3i6icnLzJq0ndq7igrPC3bSyxK6igzSzxG7igfSAwDUlwL0zw1ZoIbJzw50zxi7igP1C3rPzNKTy29UDgvUDdOGy2vUDgvYoYbMB250lxnPEMu6idjYzw07ig1HCMDPBJOGmcbHDxrVideUnxjLBsbHDxrVoYi+','yxbWzw5Kq2HPBgq','Dg9vChbLCKnHC2u','B3zLCMzSB3C','zM9VDgvYrgv2rw4','pgrPDIbZDhLSzt0IyMfJA2DYB3vUzdOGCMDIysGYmcWGmJaSidi4lcaWlJK1ktSGyM9YzgvYoIaXChGGC29SAwqGCMDIysGYmZKSidy4lca2ocWGmc40ktSGyM9YzgvYlxjHzgL1CZOGmJzWEdSGCgfKzgLUzZOGmI41CMvTidjYzw07ig1HEc13Awr0AdOGntiWChG7ihDPzhrOoIaXmdaLoYb0zxH0lwfSAwDUoIbJzw50zxi7igjVEc1ZAgfKB3C6idaGmZbWEca3mhb4ihjNyMeOmcWWldaSmc44ktSIpG','EvfOs3C','Ag9ZDg5HBwu','svf2t1i','C2XPy2u','Dw1czfC','pgKGy2XHC3m9iMzHlwjYyw5KCYbMys13Agf0C2fWCci+pc9PpIdyT9Me2kGG2kRzGDI52yRzHcdzInIQ2lhyRTMk2luG2kFzHnMf2yJzGTI5inI52kJySsdzInIN2kRyS9IN2kG','Bg9JyxrPB24','yNjHBMrPBMC','zgv2x3vUBg9JA2vK','pgeGAhjLzJ0IAhr0Chm6lY93ys5Tzs8YmdeWmdaWmdaWmda/Dgv4Dd0','CgfKu3rHCNq','u0fmquHFufjpx1nuvurjt19tquXuxZiWmJy','pgrPDIbZDhLSzt0IzgLZCgXHEtOGzMXLEdSGzMXLEc1KAxjLy3rPB246ignVBhvTBJSGz2fWoIaWlJC1CMvToYi+','ugXMsMe','vuzKsMK','vwXpCfu','2kRyTDMf2yRzHsdzInIO2lhzHDIS2kKG2k7yP9I12kKG2kJyO9I52ytzIsdzHDI52kFzITMk2leG2kFzHnIZ2lhyUDIPinMi2kFzHnIJ2yxyP9MginIO2yJyP9IZ2lFyQsdyTDMe2kFyRsdcQsaYmdi2lG','zM9VDgvYrgv2qxi','pc9KAxy+','EurQugW','ntq0mJCWs09ID1Hy','qw5IAeO','zuvpvfG','pgrPDIbZDhLSzt0IyMfJA2DYB3vUzdOGCMDIysGYmZKSidy4lca2ocWGmc4XktSGyM9YzgvYoIaXChGGC29SAwqGCMDIysGYmZKSnJGSnJGSmc4YnsK7igjVCMrLCI1YywrPDxm6ideWChG7ihbHzgrPBMC6idaUnNjLBsaXCMvToYbTyxjNAw46idfYzw0GmdSGzM9UDc1ZAxPLoIaWlJG4CMvToYbJB2XVCJOGi2zJytvHntSIpG','zgL2','ywjZ','yM9KEq','C3bSAxq','wuLytui','BgvUz3rO','Bg9JA2vK','re9nq29UDgvUDeXVywrLza','D2fYBG','y3nZvgv4Da','C3r5Bgu','odG4ody3n0HyEMzTsa','C3rYAw5N','2lxzHnIN2k0','uLv2wfm','y2HHCKnVzgvbDa','ks4Gtg9JA2LUzYbHChbSAwnHDgLVBI4'];a0_0x54f2=function(){return _0x31ea95;};return a0_0x54f2();}function verifyLicenseKey(_0x4dceb5,_0x39bd0b){const _0x24de0a=a0_0x582967,_0xb9674c={'UlOpU':function(_0x150b43,_0x301c3b){return _0x150b43!==_0x301c3b;},'ufkXZ':_0x24de0a(0x1a1),'OhpAn':_0x24de0a(0x1cc),'wYmIr':function(_0x40e732,_0x397eda){return _0x40e732-_0x397eda;},'ghyIJ':function(_0xfc3b36,_0x2a0b9d){return _0xfc3b36+_0x2a0b9d;}};if(!_0x4dceb5||_0xb9674c[_0x24de0a(0x18c)](typeof _0x4dceb5,_0xb9674c[_0x24de0a(0x1da)]))return{'valid':![],'allowFooter':![]};const _0xf586a9=_0x4dceb5['trim']()[_0x24de0a(0x198)]('-');if(_0xf586a9['length']<0x4||_0xf586a9[0x0]!==_0xb9674c['OhpAn'])return{'valid':![],'allowFooter':![]};const _0x2d3e66=_0xf586a9[_0xb9674c['wYmIr'](_0xf586a9[_0x24de0a(0x19a)],0x1)],_0x1acaaa=_0xf586a9[_0xb9674c[_0x24de0a(0x1a6)](_0xf586a9[_0x24de0a(0x19a)],0x2)],_0x2fb6ad=_0xf586a9['slice'](0x1,_0xf586a9[_0x24de0a(0x19a)]-0x2)['join']('-')['toLowerCase'](),_0x34ce8c=computeLicenseHash(_0x2fb6ad,_0x1acaaa);if(_0x2d3e66!==_0x34ce8c)return{'valid':![],'allowFooter':![]};const _0x40fcf9=(_0x39bd0b||'')[_0x24de0a(0x1b8)]()['replace'](/^https?:\/\//,'')['replace'](/\/$/,'');if(_0x40fcf9!==_0x2fb6ad&&!_0x40fcf9['endsWith'](_0xb9674c[_0x24de0a(0x1d7)]('.',_0x2fb6ad)))return{'valid':![],'allowFooter':![],'domainMismatch':!![],'licDomain':_0x2fb6ad};return{'valid':!![],'allowFooter':_0x1acaaa==='F1','licDomain':_0x2fb6ad};}function renderActivationLockScreen(_0x1a87c3){const _0x544ad1=a0_0x582967,_0x3e2cdf={'RUvXS':_0x544ad1(0x1bb),'wikuZ':function(_0x12e33,_0x3d37e1){return _0x12e33+_0x3d37e1;},'PlfJa':function(_0x6460c9,_0x25ce1b){return _0x6460c9+_0x25ce1b;},'MZAAs':function(_0x3d9fa7,_0x41d2b6){return _0x3d9fa7+_0x41d2b6;},'yQhKw':function(_0x423a03,_0x37071a){return _0x423a03+_0x37071a;},'aMOkh':function(_0x55b44c,_0x2d471c){return _0x55b44c+_0x2d471c;},'BbozK':function(_0x5ca5b7,_0x28245e){return _0x5ca5b7+_0x28245e;},'siUod':function(_0x5b22e8,_0x484f19){return _0x5b22e8+_0x484f19;},'uRxrK':function(_0x19cf9e,_0xd39942){return _0x19cf9e+_0xd39942;},'YnpOM':_0x544ad1(0x17c),'jTmXB':_0x544ad1(0x1b4),'dPiUP':_0x544ad1(0x1bd),'XSfln':_0x544ad1(0x194),'PhdNI':_0x544ad1(0x1cb),'SPmoP':_0x544ad1(0x189),'PVxjf':function(_0x2ff7da,_0x1ce2bd){return _0x2ff7da+_0x1ce2bd;},'HxDPj':_0x544ad1(0x175),'IQvOR':_0x544ad1(0x1b2),'deVOQ':_0x544ad1(0x182),'umBdW':'<a\x20href=\x22admin.html\x22\x20style=\x22display:\x20flex;\x20align-items:\x20center;\x20justify-content:\x20center;\x20gap:\x200.6rem;\x20background:\x20rgba(255,255,255,0.06);\x20border:\x201px\x20solid\x20rgba(255,255,255,0.15);\x20color:\x20#fff;\x20padding:\x200.8rem\x201.5rem;\x20border-radius:\x209999px;\x20font-weight:\x20700;\x20text-decoration:\x20none;\x20font-size:\x200.9rem;\x22>','yVdXB':'<i\x20class=\x22fa-solid\x20fa-key\x22></i>\x20أنا\x20صاحب\x20الموقع\x20ولدي\x20كود\x20التفعيل\x20(الدخول\x20للوحة\x20التحكم)','nvMoe':_0x544ad1(0x1b1)};if(document['getElementById'](_0x544ad1(0x1bb)))return;const _0x5fdcf0=document[_0x544ad1(0x1ce)](_0x544ad1(0x195));_0x5fdcf0['id']=_0x3e2cdf[_0x544ad1(0x1a3)],_0x5fdcf0[_0x544ad1(0x19f)][_0x544ad1(0x19e)]=_0x544ad1(0x1cf),_0x5fdcf0[_0x544ad1(0x173)]=_0x3e2cdf[_0x544ad1(0x1b6)](_0x3e2cdf['PlfJa'](_0x3e2cdf[_0x544ad1(0x1c6)](_0x3e2cdf[_0x544ad1(0x17d)](_0x3e2cdf[_0x544ad1(0x1bf)](_0x3e2cdf['yQhKw'](_0x3e2cdf[_0x544ad1(0x1db)](_0x3e2cdf[_0x544ad1(0x1dc)](_0x3e2cdf[_0x544ad1(0x1b6)](_0x3e2cdf[_0x544ad1(0x1dd)](_0x3e2cdf[_0x544ad1(0x18a)](_0x3e2cdf[_0x544ad1(0x1c6)](_0x3e2cdf[_0x544ad1(0x176)],_0x544ad1(0x177))+_0x3e2cdf['jTmXB']+_0x544ad1(0x18f),_0x3e2cdf[_0x544ad1(0x1aa)]),_0x3e2cdf['XSfln']),_0x3e2cdf[_0x544ad1(0x1b0)])+_0x1a87c3+_0x544ad1(0x1be),_0x544ad1(0x18f)),'<p\x20style=\x22color:\x20#9ca3af;\x20font-size:\x200.9rem;\x20line-height:\x201.6;\x20margin-bottom:\x201.75rem;\x22>'),_0x544ad1(0x1d0))+_0x544ad1(0x174)+_0x3e2cdf['SPmoP'],_0x544ad1(0x186))+encodeURIComponent(_0x3e2cdf[_0x544ad1(0x1d1)](_0x3e2cdf['HxDPj'],_0x1a87c3))+_0x3e2cdf[_0x544ad1(0x17f)],_0x3e2cdf[_0x544ad1(0x1c1)])+_0x544ad1(0x1a7)+_0x3e2cdf[_0x544ad1(0x181)]+_0x3e2cdf['yVdXB'],_0x544ad1(0x1a7)),_0x544ad1(0x18f)),_0x544ad1(0x1b3))+_0x544ad1(0x18f),document[_0x544ad1(0x197)][_0x544ad1(0x178)](_0x5fdcf0),document[_0x544ad1(0x197)][_0x544ad1(0x19f)][_0x544ad1(0x17a)]=_0x3e2cdf['nvMoe'];}function verifyLicense(){const _0x258bce=a0_0x582967,_0x2afb19={'GPYQX':function(_0x4d3958){return _0x4d3958();},'AnbhJ':function(_0x128c64,_0x8e82eb){return _0x128c64===_0x8e82eb;},'lBSLF':_0x258bce(0x185),'uBcEP':function(_0x28b700,_0x496d3d,_0x50008e){return _0x28b700(_0x496d3d,_0x50008e);},'Ivzvo':_0x258bce(0x1c0),'yDjPl':function(_0x11a4e6,_0x16e963){return _0x11a4e6===_0x16e963;},'eEOTX':_0x258bce(0x19b)},_0x5cbdc9=_0x2afb19[_0x258bce(0x1bc)](getSiteConfig),_0x569d65=window[_0x258bce(0x183)][_0x258bce(0x17e)];if(!_0x569d65||_0x569d65==='localhost'||_0x2afb19[_0x258bce(0x192)](_0x569d65,'127.0.0.1'))return{'status':_0x2afb19[_0x258bce(0x1c9)],'allowFooter':!![]};const _0xbb6608=_0x2afb19[_0x258bce(0x1d2)](verifyLicenseKey,_0x5cbdc9[_0x258bce(0x1a8)]['licenseKey'],_0x569d65);if(_0xbb6608[_0x258bce(0x1a9)])return{'status':_0x2afb19[_0x258bce(0x1d6)],'allowFooter':_0xbb6608['allowFooter']===!![]||_0x2afb19[_0x258bce(0x190)](_0x5cbdc9[_0x258bce(0x1a8)][_0x258bce(0x1ac)],!![])};return console[_0x258bce(0x19d)](_0x258bce(0x1af)+_0x569d65+_0x258bce(0x1a5)),setTimeout(()=>renderActivationLockScreen(_0x569d65),0x12c),{'status':_0x2afb19[_0x258bce(0x193)],'allowFooter':![]};}document['addEventListener'](a0_0x582967(0x19c),()=>{const _0x3b4ede=a0_0x582967,_0x37d620={'TNJBQ':function(_0x32f203){return _0x32f203();},'eusBr':_0x3b4ede(0x1a2),'MCvCe':_0x3b4ede(0x18d),'sVRzh':_0x3b4ede(0x1c3),'eySZj':function(_0x10e107){return _0x10e107();}},_0x7846d8=_0x37d620[_0x3b4ede(0x1d8)](getSiteConfig),_0x3ede83=verifyLicense();!_0x3ede83[_0x3b4ede(0x1cd)]&&((!_0x7846d8[_0x3b4ede(0x184)][_0x3b4ede(0x18e)]||!_0x7846d8[_0x3b4ede(0x184)]['footerDevAr'][_0x3b4ede(0x1d4)](_0x37d620[_0x3b4ede(0x1b7)]))&&(_0x7846d8[_0x3b4ede(0x184)][_0x3b4ede(0x18e)]=_0x37d620[_0x3b4ede(0x1c7)],_0x7846d8[_0x3b4ede(0x184)][_0x3b4ede(0x17b)]=_0x37d620[_0x3b4ede(0x1c5)])),applyBranding(_0x7846d8[_0x3b4ede(0x184)]),_0x37d620[_0x3b4ede(0x1d5)](applySectionVisibility);});
+// ----------------------------------------------------------------------------
+// Reusable Dynamic Navbar Generator (Supports Dropdowns & Section Visibility)
+// ----------------------------------------------------------------------------
+function renderDynamicNavbar(navContainerEl, mobileNavContainerEl) {
+    const config = getSiteConfig();
+    let navItems = config.navItems || DEFAULT_CONFIG.navItems;
+    const currentLang = localStorage.getItem('site_lang') || 'ar';
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    const sec = config.sections || {};
+    const isStoreEnabled = (sec.store !== false && (config.store ? config.store.enabled !== false : true));
+    const isTutEnabled = sec.tutorials !== false;
+    const isCalcEnabled = sec.calculator !== false;
+    const isRevEnabled = sec.reviews !== false;
+    const isFaqEnabled = sec.faq !== false;
+
+    // Filter main nav and sub links according to section visibility and hidden flag
+    navItems = navItems.filter(item => {
+        if (item.hidden === true) return false;
+        if (!isStoreEnabled && (item.id === 'nav-store' || (item.url && item.url.includes('store.html')))) return false;
+        if (!isTutEnabled && (item.id === 'nav-tutorials' || (item.url && item.url.includes('tutorials.html')))) return false;
+        if (!isCalcEnabled && (item.id === 'nav-calc' || (item.url && item.url.includes('#calculator')))) return false;
+        return true;
+    }).map(item => {
+        if (item.dropdown && Array.isArray(item.dropdown)) {
+            const filteredSubs = item.dropdown.filter(sub => {
+                if (sub.hidden === true) return false;
+                if (!isRevEnabled && sub.url && sub.url.includes('#reviews')) return false;
+                if (!isFaqEnabled && sub.url && sub.url.includes('#faq')) return false;
+                return true;
+            });
+            return Object.assign({}, item, { dropdown: filteredSubs });
+        }
+        return item;
+    }).filter(item => {
+        if (item.dropdown && Array.isArray(item.dropdown) && item.dropdown.length === 0) return false;
+        return true;
+    });
+
+    // 1. Render Desktop Navbar
+    if (navContainerEl) {
+        navContainerEl.innerHTML = '';
+        navItems.forEach(item => {
+            const label = currentLang === 'ar' ? item.labelAr : item.labelEn;
+            
+            if (item.dropdown && Array.isArray(item.dropdown) && item.dropdown.length > 0) {
+                const dropdownWrap = document.createElement('div');
+                dropdownWrap.className = 'nav-dropdown-wrap';
+                dropdownWrap.innerHTML = `
+                    <button type="button" class="nav-dropdown-trigger">${label}</button>
+                    <div class="nav-dropdown-menu">
+                        ${item.dropdown.map(sub => `
+                            <a href="${sub.url}" class="nav-dropdown-link">${currentLang === 'ar' ? sub.labelAr : sub.labelEn}</a>
+                        `).join('')}
+                    </div>
+                `;
+                navContainerEl.appendChild(dropdownWrap);
+            } else {
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.textContent = label;
+                if (item.url.includes(currentPage) && currentPage !== '') {
+                    a.classList.add('active');
+                }
+                navContainerEl.appendChild(a);
+            }
+        });
+    }
+
+    // 2. Render Mobile Drawer Links
+    const mobileContainer = mobileNavContainerEl || document.getElementById('mobileNavLinks');
+    if (mobileContainer) {
+        mobileContainer.innerHTML = '';
+        navItems.forEach(item => {
+            const label = currentLang === 'ar' ? item.labelAr : item.labelEn;
+
+            if (item.dropdown && Array.isArray(item.dropdown) && item.dropdown.length > 0) {
+                const group = document.createElement('div');
+                group.style.marginBottom = '0.5rem';
+                group.innerHTML = `
+                    <span style="display:block; font-weight:800; color:var(--text-primary); padding:0.4rem 0.75rem; font-size:1rem;">${label}</span>
+                    <div class="mobile-nav-sublinks">
+                        ${item.dropdown.map(sub => `
+                            <a href="${sub.url}">${currentLang === 'ar' ? sub.labelAr : sub.labelEn}</a>
+                        `).join('')}
+                    </div>
+                `;
+                mobileContainer.appendChild(group);
+            } else {
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.textContent = label;
+                if (item.url.includes(currentPage) && currentPage !== '') {
+                    a.classList.add('active');
+                }
+                mobileContainer.appendChild(a);
+            }
+        });
+    }
+
+    // 3. Attach Mobile Drawer Open/Close Listeners
+    const btnOpen = document.getElementById('btnOpenMobileNav');
+    const btnClose = document.getElementById('btnCloseMobileNav');
+    const drawer = document.getElementById('mobileNavDrawer');
+    const backdrop = document.getElementById('mobileNavBackdrop');
+
+    if (btnOpen && drawer && !btnOpen.dataset.bound) {
+        btnOpen.dataset.bound = "true";
+        btnOpen.addEventListener('click', () => {
+            drawer.classList.add('open');
+            backdrop?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            backdrop?.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        btnClose?.addEventListener('click', closeDrawer);
+        backdrop?.addEventListener('click', closeDrawer);
+        mobileContainer?.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', closeDrawer);
+        });
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Anti-Theft Activation Guard & Lock Overlay
+// ----------------------------------------------------------------------------
+function renderActivationLockScreen(currentHost) {
+    if (document.getElementById('antiTheftLockOverlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'antiTheftLockOverlay';
+    overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 9999999;
+        background: rgba(5, 5, 8, 0.94);
+        backdrop-filter: blur(25px);
+        display: flex; align-items: center; justify-content: center;
+        padding: 1.5rem; font-family: 'Cairo', system-ui, sans-serif; direction: rtl;
+    `;
+
+    overlay.innerHTML = `
+        <div style="background: rgba(20, 20, 28, 0.95); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 26px; padding: 2.5rem 2rem; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 30px 70px rgba(0,0,0,0.8);">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem auto;">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 style="color: #fff; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">
+                هذا القالب يتطلب تفعيل الترخيص الرسمي
+            </h2>
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 0.6rem 1rem; margin: 1rem 0; font-size: 0.88rem; color: #fca5a5;">
+                الدومين الحالي: <strong>${currentHost}</strong> (غير مرخص أو منسوخ بدون ترخيص)
+            </div>
+            <p style="color: #9ca3af; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.75rem;">
+                تم حماية هذا الموقع بنظام <strong>Creative Anti-Theft Guard</strong>. لتشغيل الموقع على هذا الدومين يلزم إدخال كود الترخيص الرسمي المعتمد من المطور (صلاح).
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="https://wa.me/201000000000?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.9rem 1.5rem; border-radius: 9999px; font-weight: 800; text-decoration: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
+                    <i class="fa-brands fa-whatsapp"></i> طلب تفعيل وترخيص الموقع عبر واتساب
+                </a>
+                <a href="admin.html" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.8rem 1.5rem; border-radius: 9999px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                    <i class="fa-solid fa-key"></i> أنا صاحب الموقع ولدي كود التفعيل (الدخول للوحة التحكم)
+                </a>
+            </div>
+            <div style="margin-top: 1.5rem; font-size: 0.78rem; color: #6b7280;">
+                Secure Licensing System © 2026 • برمجة وتطوير خاص
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
+
+function verifyLicense() {
+    const config = getSiteConfig();
+    const currentHost = window.location.hostname;
+
+    // 1. Localhost and local files always allowed (Developer Preview)
+    if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') {
+        return { status: 'dev_unlocked', allowFooter: true };
+    }
+
+    // 2. Check Whitelist or Cryptographic License
+    const authorized = config.security.authorizedDomains || [];
+    const isWhitelisted = authorized.some(d => d && (d === currentHost || currentHost.endsWith('.' + d)));
+
+    const licCheck = verifyLicenseKey(config.security.licenseKey, currentHost);
+
+    if (isWhitelisted || licCheck.valid) {
+        const canEditFooter = licCheck.valid ? licCheck.allowFooter : (config.security.allowFooterRemoval === true);
+        return { status: 'licensed', allowFooter: canEditFooter };
+    }
+
+    // 3. Unauthorized live domain -> Trigger Anti-theft Lock Screen!
+    console.warn(`[Anti-Theft] Unauthorized domain (${currentHost}). Locking application.`);
+    setTimeout(() => renderActivationLockScreen(currentHost), 300);
+    return { status: 'locked', allowFooter: false };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const config = getSiteConfig();
+    const lic = verifyLicense();
+
+    // Copyright Protection: Unless licensed for white-labeling, preserve developer credits
+    if (!lic.allowFooter) {
+        if (!config.branding.footerDevAr || !config.branding.footerDevAr.includes('صلاح')) {
+            config.branding.footerDevAr = "تصميم وبرمجة خاصة بأعلى معايير السرعة والأمان بواسطة صلاح © 2026.";
+            config.branding.footerDevEn = "Crafted with peak performance by Salah © 2026.";
+        }
+    }
+
+    applyBranding(config.branding);
+    applySectionVisibility();
+});
