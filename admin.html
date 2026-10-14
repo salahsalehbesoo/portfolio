@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم الشاملة | Control Center</title>
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
@@ -41,7 +42,7 @@
                     <label class="login-label"><i class="fa-solid fa-user"></i> اسم المستخدم أو البريد:</label>
                     <div class="login-input-box">
                         <i class="fa-solid fa-at login-box-icon"></i>
-                        <input type="text" id="adminUsernameInput" class="login-text-input" placeholder="اسم المستخدم (الافتراضي: admin)" value="admin" autocomplete="username">
+                        <input type="text" id="adminUsernameInput" class="login-text-input" placeholder="أدخل اسم المستخدم..." autocomplete="username">
                     </div>
                 </div>
 
@@ -50,7 +51,7 @@
                     <label class="login-label"><i class="fa-solid fa-lock"></i> كلمة المرور أو رمز PIN:</label>
                     <div class="login-input-box">
                         <i class="fa-solid fa-key login-box-icon"></i>
-                        <input type="password" id="adminPasswordInput" class="login-text-input" placeholder="أدخل كلمة المرور (الافتراضي: 123456)..." autocomplete="current-password" autofocus>
+                        <input type="password" id="adminPasswordInput" class="login-text-input" placeholder="أدخل كلمة المرور..." autocomplete="current-password" autofocus>
                         <button type="button" id="btnToggleLoginPass" class="login-pass-toggle" title="إظهار / إخفاء كلمة المرور">
                             <i class="fa-solid fa-eye"></i>
                         </button>
@@ -75,29 +76,14 @@
                 </button>
             </form>
 
-            <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--admin-muted);">
-                <span>الافتراضي: <strong>admin</strong> / <strong>123456</strong></span>
-                <button type="button" id="btnDirectDefaultLogin" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--admin-emerald); color: #10b981; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
-                    <i class="fa-solid fa-bolt"></i> دخول مباشر بـ 123456
-                </button>
-            </div>
-
-            <!-- PIN Reset Box (Shown when forgot PIN is clicked) -->
-            <div id="pinResetBox" class="pin-reset-box" style="display: none; margin-top: 1.25rem; text-align: right;">
+            <!-- PIN Reset Box (Shown when forgot PIN is clicked - Requires Email/Phone/Master Verification) -->
+            <div id="pinResetBox" class="pin-reset-box" style="display: none; margin-top: 1.25rem; text-align: right; border-top: 1px solid var(--admin-border); padding-top: 1rem;">
                 <h3 style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">
-                    <i class="fa-solid fa-rotate-left"></i> استعادة وإعادة تعيين كلمة المرور
+                    <i class="fa-solid fa-shield-halved"></i> استعادة وتعيين كلمة مرور جديدة
                 </h3>
                 <p style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.9rem; line-height: 1.5;">
-                    يمكنك إعادة تعيين كلمة المرور إلى الافتراضية بنقرة واحدة، أو التحقق بالبريد / الهاتف المسجل.
+                    لدواعي الأمان، أدخل بريدك المسجل أو رقم هاتفك أو مفتاح المطور للتحقق من هويتك وتعيين كلمة مرور جديدة:
                 </p>
-                <div style="margin-bottom: 1rem;">
-                    <button type="button" id="btnResetToDefaultPin" style="width: 100%; padding: 0.75rem; background: rgba(0, 113, 227, 0.15); border: 1px solid var(--admin-blue); color: var(--admin-blue); border-radius: 12px; font-weight: 800; cursor: pointer;">
-                        <i class="fa-solid fa-arrows-rotate"></i> إعادة الضبط للافتراضي (123456) والدخول فوراً
-                    </button>
-                </div>
-                <div style="position: relative; text-align: center; margin: 1rem 0; border-top: 1px dashed var(--admin-border);">
-                    <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--admin-card); padding: 0 8px; font-size: 0.75rem; color: var(--admin-muted);">أو تعيين كلمة مرور جديدة</span>
-                </div>
                 <div class="form-group-admin" style="margin-bottom: 0.65rem;">
                     <input type="text" id="resetRecoveryContact" class="form-input-admin" placeholder="البريد الإلكتروني أو رقم الهاتف أو مفتاح المطور..." style="text-align: right; font-size: 0.9rem;">
                 </div>
@@ -1019,11 +1005,11 @@
                     <div class="form-grid-2">
                         <div class="form-group-admin">
                             <label class="form-label-admin">رقم الواتساب بالصيغة الدولية (بدون + أو مسافات) *</label>
-                            <input type="text" id="profWhatsapp" class="form-input-admin" placeholder="مثال: 201000000000" required>
+                            <input type="text" id="profWhatsapp" class="form-input-admin" placeholder="مثال: 201028076694" required>
                         </div>
                         <div class="form-group-admin">
                             <label class="form-label-admin">البريد الإلكتروني للتعافي والاتصال (Recovery Email) *</label>
-                            <input type="email" id="profEmail" class="form-input-admin" placeholder="مثال: info@example.com" required>
+                            <input type="email" id="profEmail" class="form-input-admin" placeholder="مثال: Salahsalehbesoo@gmail.com" required>
                         </div>
                     </div>
 
@@ -1037,31 +1023,55 @@
                     </button>
                 </div>
 
-                <!-- Admin PIN Security & Password Change Card -->
+                <!-- Admin Security, Custom Login & Password Card -->
                 <div class="admin-panel-card" style="margin-top: 1.5rem;">
                     <div class="panel-card-head">
-                        <h3><i class="fa-solid fa-key"></i> أمان لوحة التحكم (تغيير رمز PIN)</h3>
+                        <h3><i class="fa-solid fa-user-lock"></i> بيانات تسجيل الدخول وأمان المدير (Admin Credentials & Recovery)</h3>
                     </div>
-                    <p style="color: var(--admin-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
-                        يمكنك هنا تغيير رمز PIN المكون من 6 أرقام والمستخدم للدخول إلى لوحة التحكم هذه وحمايتها.
+                    <p style="color: var(--admin-muted); font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.6;">
+                        خصص بيانات تسجيل الدخول الخاصة بك بحرية كاملة. يمكنك تعيين اسم مستخدم أو بريد إلكتروني خاص بك، وتغيير كلمة المرور، وتحديد بريد ورقم هاتف الاستعادة للطوارئ.
                     </p>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+
+                    <!-- Row 1: Username & Recovery Contacts -->
+                    <div class="form-grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
                         <div class="form-group-admin">
-                            <label class="form-label-admin">رمز PIN الحالي (6 أرقام) *</label>
-                            <input type="password" id="pinCurrentInput" maxlength="6" class="form-input-admin" placeholder="رمز PIN الحالي (6 أرقام)...">
+                            <label class="form-label-admin"><i class="fa-solid fa-user"></i> اسم المستخدم / بريد الدخول *</label>
+                            <input type="text" id="adminLoginUsername" class="form-input-admin" placeholder="الافتراضي: admin أو بريدك" autocomplete="username">
                         </div>
                         <div class="form-group-admin">
-                            <label class="form-label-admin">رمز PIN الجديد (6 أرقام) *</label>
-                            <input type="password" id="pinNewInput" maxlength="6" class="form-input-admin" placeholder="6 أرقام جديدة...">
+                            <label class="form-label-admin"><i class="fa-solid fa-envelope"></i> بريد الاستعادة عند نسيان كلمة المرور *</label>
+                            <input type="email" id="adminRecoveryEmail" class="form-input-admin" placeholder="مثال: user@example.com">
                         </div>
                         <div class="form-group-admin">
-                            <label class="form-label-admin">تأكيد رمز PIN الجديد (6 أرقام) *</label>
-                            <input type="password" id="pinConfirmInput" maxlength="6" class="form-input-admin" placeholder="تأكيد 6 أرقام...">
+                            <label class="form-label-admin"><i class="fa-brands fa-whatsapp"></i> رقم هاتف / واتساب الاستعادة *</label>
+                            <input type="text" id="adminRecoveryPhone" class="form-input-admin" placeholder="مثال: 201028076694">
                         </div>
                     </div>
-                    <div style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                        <button type="button" class="btn-unlock" id="btnUpdatePin" style="width: auto; padding: 0.8rem 2rem;">
-                            <i class="fa-solid fa-shield-halved"></i> تحديث وحفظ رمز PIN الجديد
+
+                    <!-- Row 2: Password Change -->
+                    <div style="border-top: 1px dashed var(--admin-border); padding-top: 1rem; margin-top: 0.5rem;">
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
+                            <i class="fa-solid fa-key"></i> تغيير كلمة المرور / رمز PIN (اختياري)
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">كلمة المرور الحالية للتأكيد *</label>
+                                <input type="password" id="pinCurrentInput" class="form-input-admin" placeholder="أدخل كلمة المرور الحالية...">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">كلمة المرور الجديدة *</label>
+                                <input type="password" id="pinNewInput" class="form-input-admin" placeholder="كلمة المرور الجديدة (4 خانات فأكثر)...">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">تأكيد كلمة المرور الجديدة *</label>
+                                <input type="password" id="pinConfirmInput" class="form-input-admin" placeholder="تأكيد كلمة المرور الجديدة...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-unlock" id="btnUpdatePin" style="width: auto; padding: 0.85rem 2.2rem;">
+                            <i class="fa-solid fa-shield-halved"></i> حفظ وتحديث بيانات الدخول والأمان
                         </button>
                         <span id="pinUpdateFeedback" style="font-size: 0.88rem; font-weight: 700;"></span>
                     </div>
@@ -1318,8 +1328,11 @@
                             <button type="submit" class="btn-unlock" id="btnActivateLicense" style="width: auto; padding: 0.9rem 2.2rem;">
                                 <i class="fa-solid fa-circle-check"></i> تفعيل الترخيص وفتح الموقع فوراً
                             </button>
-                            <a id="btnContactForLicense" href="https://wa.me/201000000000" target="_blank" class="btn-cancel-edit" style="display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; padding:0.9rem 1.75rem; color:#25D366; border-color:rgba(37,211,102,0.4);">
-                                <i class="fa-brands fa-whatsapp"></i> طلب أو استلام كود التفعيل عبر واتساب
+                            <button type="button" class="btn-unlock" id="btnMasterInstantActivate" style="width: auto; padding: 0.9rem 2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                                <i class="fa-solid fa-bolt"></i> تفعيل فوري للدومين الحالي (خاص بالمطور صلاح ⚡)
+                            </button>
+                            <a id="btnContactForLicense" href="https://wa.me/201028076694" target="_blank" class="btn-cancel-edit" style="display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; padding:0.9rem 1.75rem; color:#25D366; border-color:rgba(37,211,102,0.4);">
+                                <i class="fa-brands fa-whatsapp"></i> طلب كود التفعيل عبر واتساب
                             </a>
                         </div>
                     </form>

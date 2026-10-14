@@ -1,0 +1,17 @@
+# robots.txt - Pro Portfolio Security & Anti-Indexing Configuration
+User-agent: *
+Disallow: /admin.html
+Disallow: /developer.html
+Disallow: /js/admin.js
+Disallow: /js/config.js
+
+# Allow public discovery for showcase, store and tutorials
+Allow: /
+Allow: /index.html
+Allow: /store.html
+Allow: /tutorials.html
+Allow: /css/
+Allow: /img/
+Allow: /js/main.js
+Allow: /js/analytics.js
+Allow: /js/translations.js
