@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
 
-        const waUrl = `https://wa.me/${prof.whatsapp || '201000000000'}`;
+        const waUrl = `https://wa.me/${prof.whatsapp || '201028076694'}`;
         if (heroWaBtn) heroWaBtn.href = waUrl;
         if (floatingWaBubble) floatingWaBubble.href = waUrl;
     }
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             products.forEach(p => {
                 const priceLocal = Math.round(p.priceUsd * rateObj.rate);
                 const waText = `أهلاً 👋\nأريد شراء وتحميل: ${p.titleAr} (${priceLocal} ${rateObj.symbol})`;
-                const waLink = `https://wa.me/${siteConfig.profile.whatsapp || '201000000000'}?text=${encodeURIComponent(waText)}`;
+                const waLink = `https://wa.me/${siteConfig.profile.whatsapp || '201028076694'}?text=${encodeURIComponent(waText)}`;
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
@@ -495,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const hostName = (prof && prof.nameAr) ? prof.nameAr.split('|')[0].trim() : '';
             const greeting = hostName ? `مرحباً ${hostName}،` : 'مرحباً،';
             const waText = encodeURIComponent(`${greeting} أود الاستفسار وطلب تنفيذ مشروع فيديو مماثل لـ: "${title || 'أعمالك في الموقع'}"`);
+            const waNum = (prof && prof.whatsapp) ? prof.whatsapp.replace(/[^0-9]/g, '') : '201028076694';
             lightboxWaCta.href = `https://wa.me/${waNum}?text=${waText}`;
         }
 
@@ -710,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sumTotal) sumTotal.textContent = `${totalLocal} ${currSymbol}`;
 
         if (calcWhatsAppBtn) {
-            const waNumber = siteConfig.profile.whatsapp || '201000000000';
+            const waNumber = siteConfig.profile.whatsapp || '201028076694';
             const waText = currentLang === 'ar'
                 ? `أهلاً 👋\nأريد الاستفسار عن حجز باقة:\n• الخدمة: ${serviceName} (${calcState.quantity} فيديو - ${durationDesc})\n• التكلفة الإجمالية: ${totalLocal} ${currSymbol}${discountAmount > 0 ? ` (شامل خصم ${discountPct * 100}%)` : ''}\n• مدة التسليم: ${deliveryStr}\nجاهز لبدء العمل معك!`
                 : `Hi 👋\nI'd like to book a project:\n• Service: ${serviceName} (${calcState.quantity} video(s) - ${durationDesc})\n• Total Cost: ${totalLocal} ${currSymbol}${discountAmount > 0 ? ` (${discountPct * 100}% OFF)` : ''}\n• Turnaround: ${deliveryStr}\nReady to get started!`;

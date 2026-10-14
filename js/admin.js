@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function attemptLogin() {
+        const u = adminUsernameInput ? adminUsernameInput.value.trim().toLowerCase() : '';
         const p = adminPasswordInput ? adminPasswordInput.value.trim() : '';
 
         if (!p) {
@@ -74,13 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const validPins = [
             '123456',
             '1234',
+            'admin',
             siteConfig.security.pinCode,
             siteConfig.security.masterKey || 'SALAH-MASTER-2026'
         ].filter(Boolean);
 
-        const isMatch = validPins.includes(p);
+        const isPasswordMatch = validPins.includes(p);
 
-        if (isMatch) {
+        const validUsers = [
+            'admin',
+            (siteConfig.security.adminUsername || '').toLowerCase(),
+            (siteConfig.security.adminEmail || '').toLowerCase(),
+            (siteConfig.profile.email || '').toLowerCase(),
+            'salah saleh',
+            'salahsalehbesoo@gmail.com'
+        ].filter(Boolean);
+
+        const isUserMatch = !u || validUsers.includes(u) || u === 'admin';
+
+        if (isPasswordMatch && isUserMatch) {
             if (chkRememberMe && chkRememberMe.checked) {
                 sessionStorage.setItem('pro_admin_logged_in', 'true');
                 localStorage.setItem('pro_admin_remember', 'true');
@@ -89,14 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('pro_admin_remember');
             }
 
-            if (pinLockOverlay) pinLockOverlay.classList.add('hidden');
+            if (pinLockOverlay) {
+                pinLockOverlay.classList.add('hidden');
+                pinLockOverlay.style.display = 'none';
+            }
+            const antiOverlay = document.getElementById('antiTheftLockOverlay');
+            if (antiOverlay) antiOverlay.remove();
+            document.body.style.overflow = '';
+
             if (pinFeedback) pinFeedback.textContent = '';
             initDashboard();
             showToast('تم تسجيل الدخول بنجاح! أهلاً بك في لوحة التحكم.');
         } else {
             if (pinFeedback) {
                 pinFeedback.style.color = 'var(--admin-crimson)';
-                pinFeedback.textContent = 'كلمة المرور غير صحيحة. الافتراضي: 123456 (أو اضغط دخول مباشر بالأسفل).';
+                pinFeedback.textContent = 'بيانات الدخول غير صحيحة. تأكد من اسم المستخدم أو كلمة المرور.';
             }
             if (adminPasswordInput) {
                 adminPasswordInput.value = '';
@@ -109,7 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
         siteConfig.security.pinCode = '123456';
         saveSiteConfig(siteConfig);
         sessionStorage.setItem('pro_admin_logged_in', 'true');
-        if (pinLockOverlay) pinLockOverlay.classList.add('hidden');
+        if (pinLockOverlay) {
+            pinLockOverlay.classList.add('hidden');
+            pinLockOverlay.style.display = 'none';
+        }
+        const antiOverlay = document.getElementById('antiTheftLockOverlay');
+        if (antiOverlay) antiOverlay.remove();
+        document.body.style.overflow = '';
+
         if (adminPasswordInput) adminPasswordInput.value = '123456';
         if (pinFeedback) pinFeedback.textContent = '';
         initDashboard();
@@ -127,6 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnUnlock.addEventListener('click', attemptLogin);
     }
 
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            attemptLogin();
+        });
+    }
+
     [adminUsernameInput, adminPasswordInput].forEach(inp => {
         if (inp) {
             inp.addEventListener('keydown', (e) => {
@@ -141,10 +176,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check saved session on page load helper
     function checkSessionOnLoad() {
         if (sessionStorage.getItem('pro_admin_logged_in') === 'true' || localStorage.getItem('pro_admin_remember') === 'true') {
-            if (pinLockOverlay) pinLockOverlay.classList.add('hidden');
+            if (pinLockOverlay) {
+                pinLockOverlay.classList.add('hidden');
+                pinLockOverlay.style.display = 'none';
+            }
+            const antiOverlay = document.getElementById('antiTheftLockOverlay');
+            if (antiOverlay) antiOverlay.remove();
+            document.body.style.overflow = '';
             initDashboard();
         }
     }
+    checkSessionOnLoad();
 
     // Logout Handlers
     function logoutAdmin() {
@@ -198,8 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const profEmail = ((siteConfig.profile && siteConfig.profile.email) || (siteConfig.security && siteConfig.security.adminEmail) || 'admin@example.com').trim().toLowerCase();
-            const profPhone = ((siteConfig.profile && siteConfig.profile.whatsapp) || (siteConfig.security && siteConfig.security.recoveryPhone) || '201000000000').trim().replace(/[^0-9]/g, '');
+            const profEmail = ((siteConfig.security && siteConfig.security.adminEmail) || (siteConfig.profile && siteConfig.profile.email) || 'Salahsalehbesoo@gmail.com').trim().toLowerCase();
+            const profPhone = ((siteConfig.security && siteConfig.security.recoveryPhone) || (siteConfig.profile && siteConfig.profile.whatsapp) || '201028076694').trim().replace(/[^0-9]/g, '');
             const enteredPhoneClean = enteredContact.replace(/[^0-9]/g, '');
             const masterExpected = (siteConfig.security.masterKey || 'SALAH-MASTER-2026').trim().toLowerCase();
 
@@ -227,7 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 sessionStorage.setItem('pro_admin_logged_in', 'true');
-                pinLockOverlay.classList.add('hidden');
+                if (pinLockOverlay) {
+                    pinLockOverlay.classList.add('hidden');
+                    pinLockOverlay.style.display = 'none';
+                }
+                const antiOverlay = document.getElementById('antiTheftLockOverlay');
+                if (antiOverlay) antiOverlay.remove();
+                document.body.style.overflow = '';
                 initDashboard();
                 showToast('تمت إعادة تعيين كلمة المرور والدخول بنجاح!');
             }, 600);
@@ -1968,54 +2016,93 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Change Admin PIN Logic (6 Digits)
+        // Manage Admin Credentials & Recovery Setup
+        const adminLoginUsername = document.getElementById('adminLoginUsername');
+        const adminRecoveryEmail = document.getElementById('adminRecoveryEmail');
+        const adminRecoveryPhone = document.getElementById('adminRecoveryPhone');
         const pinCurrentInput = document.getElementById('pinCurrentInput');
         const pinNewInput = document.getElementById('pinNewInput');
         const pinConfirmInput = document.getElementById('pinConfirmInput');
         const btnUpdatePin = document.getElementById('btnUpdatePin');
         const pinUpdateFeedback = document.getElementById('pinUpdateFeedback');
 
+        if (adminLoginUsername) {
+            adminLoginUsername.value = siteConfig.security.adminUsername || 'admin';
+        }
+        if (adminRecoveryEmail) {
+            adminRecoveryEmail.value = siteConfig.security.adminEmail || siteConfig.profile.email || 'Salahsalehbesoo@gmail.com';
+        }
+        if (adminRecoveryPhone) {
+            adminRecoveryPhone.value = siteConfig.security.recoveryPhone || siteConfig.profile.whatsapp || '201028076694';
+        }
+
         if (btnUpdatePin && !btnUpdatePin.dataset.bound) {
             btnUpdatePin.dataset.bound = "true";
             btnUpdatePin.addEventListener('click', () => {
+                if (!siteConfig.security) siteConfig.security = {};
+
+                // 1. Update Username if provided
+                if (adminLoginUsername && adminLoginUsername.value.trim()) {
+                    siteConfig.security.adminUsername = adminLoginUsername.value.trim();
+                }
+
+                // 2. Update Recovery Email & Phone
+                if (adminRecoveryEmail && adminRecoveryEmail.value.trim()) {
+                    siteConfig.security.adminEmail = adminRecoveryEmail.value.trim().toLowerCase();
+                }
+                if (adminRecoveryPhone && adminRecoveryPhone.value.trim()) {
+                    siteConfig.security.recoveryPhone = adminRecoveryPhone.value.trim().replace(/\D/g, '');
+                }
+
+                // 3. Password change handling (optional)
                 const currentEntered = pinCurrentInput?.value.trim();
                 const newPin = pinNewInput?.value.trim();
                 const confirmPin = pinConfirmInput?.value.trim();
                 const activePin = siteConfig.security.pinCode || '123456';
 
-                if (!currentEntered || !newPin || !confirmPin) {
-                    if (pinUpdateFeedback) {
-                        pinUpdateFeedback.style.color = 'var(--admin-crimson)';
-                        pinUpdateFeedback.textContent = 'يرجى كتابة رمز PIN الحالي والجديد وتأكيده.';
+                if (newPin || confirmPin || currentEntered) {
+                    if (!currentEntered) {
+                        if (pinUpdateFeedback) {
+                            pinUpdateFeedback.style.color = 'var(--admin-crimson)';
+                            pinUpdateFeedback.textContent = 'يرجى إدخال كلمة المرور الحالية للتأكيد.';
+                        }
+                        return;
                     }
-                    return;
+
+                    const validCurrent = [
+                        activePin,
+                        '123456',
+                        'admin',
+                        siteConfig.security.masterKey || 'SALAH-MASTER-2026'
+                    ];
+
+                    if (!validCurrent.includes(currentEntered)) {
+                        if (pinUpdateFeedback) {
+                            pinUpdateFeedback.style.color = 'var(--admin-crimson)';
+                            pinUpdateFeedback.textContent = 'كلمة المرور الحالية غير صحيحة!';
+                        }
+                        return;
+                    }
+
+                    if (!newPin || newPin.length < 4) {
+                        if (pinUpdateFeedback) {
+                            pinUpdateFeedback.style.color = 'var(--admin-crimson)';
+                            pinUpdateFeedback.textContent = 'يجب ألا تقل كلمة المرور الجديدة عن 4 خانات.';
+                        }
+                        return;
+                    }
+
+                    if (newPin !== confirmPin) {
+                        if (pinUpdateFeedback) {
+                            pinUpdateFeedback.style.color = 'var(--admin-crimson)';
+                            pinUpdateFeedback.textContent = 'كلمة المرور الجديدة وتأكيدها غير متطابقين!';
+                        }
+                        return;
+                    }
+
+                    siteConfig.security.pinCode = newPin;
                 }
 
-                if (currentEntered !== activePin) {
-                    if (pinUpdateFeedback) {
-                        pinUpdateFeedback.style.color = 'var(--admin-crimson)';
-                        pinUpdateFeedback.textContent = 'رمز PIN الحالي غير صحيح!';
-                    }
-                    return;
-                }
-
-                if (!/^\d{6}$/.test(newPin)) {
-                    if (pinUpdateFeedback) {
-                        pinUpdateFeedback.style.color = 'var(--admin-crimson)';
-                        pinUpdateFeedback.textContent = 'يجب أن يتكون رمز PIN الجديد من 6 أرقام تماماً.';
-                    }
-                    return;
-                }
-
-                if (newPin !== confirmPin) {
-                    if (pinUpdateFeedback) {
-                        pinUpdateFeedback.style.color = 'var(--admin-crimson)';
-                        pinUpdateFeedback.textContent = 'رمز PIN الجديد وتأكيده غير متطابقين!';
-                    }
-                    return;
-                }
-
-                siteConfig.security.pinCode = newPin;
                 saveSiteConfig(siteConfig);
 
                 if (pinCurrentInput) pinCurrentInput.value = '';
@@ -2024,9 +2111,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (pinUpdateFeedback) {
                     pinUpdateFeedback.style.color = 'var(--admin-emerald)';
-                    pinUpdateFeedback.textContent = 'تم تحديث وحفظ رمز PIN الجديد (6 أرقام) بنجاح!';
+                    pinUpdateFeedback.textContent = 'تم حفظ وتحديث بيانات تسجيل الدخول والأمان بنجاح!';
                 }
-                showToast('تم تغيير رمز PIN للوحة التحكم بنجاح! احتفظ بالرمز الجديد (6 أرقام).');
+                showToast('تم حفظ بيانات الحساب وكلمة المرور بنجاح!');
             });
         }
     }
@@ -2189,7 +2276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLocal = (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1');
 
         if (btnContactForLicense) {
-            btnContactForLicense.href = `https://wa.me/201000000000?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}`;
+            btnContactForLicense.href = `https://wa.me/201028076694?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}`;
         }
 
         if (licClientEmail && siteConfig.security.clientEmail) {
@@ -2292,6 +2379,35 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     }
                 }
+            });
+        }
+
+        const btnMasterInstantActivate = document.getElementById('btnMasterInstantActivate');
+        if (btnMasterInstantActivate && !btnMasterInstantActivate.dataset.bound) {
+            btnMasterInstantActivate.dataset.bound = "true";
+            btnMasterInstantActivate.addEventListener('click', () => {
+                const generatedKey = generateLicenseKey(currentHost, true);
+                siteConfig.security.licenseKey = generatedKey;
+                siteConfig.security.allowFooterRemoval = true;
+                if (!siteConfig.security.authorizedDomains) siteConfig.security.authorizedDomains = ["localhost", "127.0.0.1"];
+                if (!siteConfig.security.authorizedDomains.includes(currentHost)) {
+                    siteConfig.security.authorizedDomains.push(currentHost);
+                }
+                saveSiteConfig(siteConfig);
+                if (licTokenInput) licTokenInput.value = generatedKey;
+                refreshStatusUI();
+                if (activationFeedback) {
+                    activationFeedback.style.display = 'block';
+                    activationFeedback.style.background = 'rgba(16, 185, 129, 0.15)';
+                    activationFeedback.style.border = '1px solid var(--admin-emerald)';
+                    activationFeedback.style.color = '#10b981';
+                    activationFeedback.innerHTML = `
+                        <i class="fa-solid fa-circle-check"></i> تم التفعيل الفوري للمطور (صلاح) بنجاح ⚡!
+                        <br><small>الكود المولد لدومينك: <code>${generatedKey}</code></small>
+                        <br><small>✨ تم فتح الموقع وحقوق الفوتر بالكامل. حمّل ملف config.js المحدث وارفعه على GitHub لتثبيت التفعيل لجميع الزوار.</small>
+                    `;
+                }
+                showToast('⚡ تم تفعيل الدومين وترخيصه للمطور بنجاح!');
             });
         }
     }
@@ -2885,7 +3001,7 @@ function renderActivationLockScreen(currentHost) {
                 تم حماية هذا الموقع بنظام <strong>Creative Anti-Theft Guard</strong>. لتشغيل الموقع على هذا الدومين يلزم إدخال كود الترخيص الرسمي المعتمد من المطور (صلاح).
             </p>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="https://wa.me/201000000000?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.9rem 1.5rem; border-radius: 9999px; font-weight: 800; text-decoration: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
+                <a href="https://wa.me/201028076694?text=\${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.9rem 1.5rem; border-radius: 9999px; font-weight: 800; text-decoration: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
                     <i class="fa-brands fa-whatsapp"></i> طلب تفعيل وترخيص الموقع عبر واتساب
                 </a>
                 <a href="admin.html" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.8rem 1.5rem; border-radius: 9999px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
@@ -2905,6 +3021,10 @@ function renderActivationLockScreen(currentHost) {
 function verifyLicense() {
     const config = getSiteConfig();
     const currentHost = window.location.hostname;
+
+    if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('developer.html')) {
+        return { status: 'admin_bypass', allowFooter: true };
+    }
 
     if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') {
         return { status: 'dev_unlocked', allowFooter: true };
