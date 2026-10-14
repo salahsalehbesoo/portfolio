@@ -71,7 +71,7 @@
 
                 <p class="pin-feedback" id="pinFeedback"></p>
 
-                <button type="button" class="btn-unlock" id="btnUnlock">
+                <button type="button" class="btn-unlock" id="btnUnlock" onclick="window.attemptLogin ? window.attemptLogin() : null">
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول
                 </button>
             </form>
@@ -584,38 +584,126 @@
                             </div>
                         </div>
 
-                        <!-- Video Frame Scrubber for Thumbnail Extraction -->
-                        <div class="video-scrubber-box" style="margin-top: 1rem; padding: 1.25rem; background: rgba(0, 113, 227, 0.05); border: 1px dashed rgba(0, 113, 227, 0.35); border-radius: 12px;">
-                            <label class="form-label-admin" style="color: var(--admin-blue); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
-                                <i class="fa-solid fa-camera-retro"></i> استخراج ثامبنيل من لقطة بالفيديو (Video Frame Scrubber):
-                            </label>
-                            <p style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.75rem;">
-                                اختر ملف فيديو من جهازك، حرّك شريط التمرير إلى اللقطة التي تريدها بالضبط، ثم اضغط التقاط لتصبح الثمبنيل الرسمي للعمل.
+                        <!-- Smart Video Thumbnail Studio (Frame Grabber & Precision Scrubber) -->
+                        <div class="video-scrubber-box" style="margin-top: 1.25rem; padding: 1.5rem; background: linear-gradient(145deg, rgba(20, 20, 32, 0.95), rgba(10, 10, 18, 0.95)); border: 1px solid rgba(0, 113, 227, 0.4); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+                                <label class="form-label-admin" style="color: var(--admin-blue); font-size: 1.05rem; font-weight: 800; display:flex; align-items:center; gap:0.6rem; margin-bottom: 0;">
+                                    <i class="fa-solid fa-film"></i> استوديو التقاط الثمبنيل السينمائي من الفيديو (Smart Frame Studio)
+                                </label>
+                                <span style="font-size: 0.78rem; background: rgba(0, 113, 227, 0.15); color: var(--admin-blue); border: 1px solid rgba(0,113,227,0.3); padding: 2px 10px; border-radius: 999px; font-weight: 700;">
+                                    تحكم فريم بـ فريم 🎬
+                                </span>
+                            </div>
+                            <p style="font-size: 0.85rem; color: var(--admin-muted); margin-bottom: 1rem; line-height: 1.6;">
+                                اختر ملف فيديو من جهازك لتمرير اللقطات واختيار الغلاف بدقة ميكروسكوبية، أو اضغط على استخراج الثمبنيل التلقائي من رابط يوتيوب أو جوجل درايف.
                             </p>
                             
-                            <div class="file-upload-actions-row" style="margin-bottom: 0.75rem;">
-                                <label for="videoScrubFileInput" class="file-upload-btn-label" style="background: rgba(0, 113, 227, 0.15); border-color: rgba(0, 113, 227, 0.3); color: var(--admin-blue);">
-                                    <i class="fa-solid fa-video"></i> اختيار فيديو من الجهاز لتمرير اللقطات
+                            <!-- Action Triggers Row -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+                                <label for="videoScrubFileInput" class="file-upload-btn-label" style="background: linear-gradient(135deg, rgba(0, 113, 227, 0.25), rgba(0, 113, 227, 0.1)); border: 1px solid rgba(0, 113, 227, 0.5); color: #fff; font-weight: 700; cursor: pointer; padding: 0.65rem 1.25rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fa-solid fa-folder-open" style="color: var(--admin-blue);"></i> 1. اختيار ملف فيديو من جهازك
                                 </label>
-                                <input type="file" id="videoScrubFileInput" class="file-upload-hidden-input" accept="video/*">
-                                <span class="file-upload-feedback-pill" id="videoScrubFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم تحميل الفيديو</span>
+                                <input type="file" id="videoScrubFileInput" class="file-upload-hidden-input" accept="video/mp4,video/quicktime,video/webm,video/*">
+
+                                <button type="button" id="btnLoadVideoFromUrl" style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--admin-border); color: #fff; font-weight: 700; cursor: pointer; padding: 0.65rem 1.25rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; transition: all 0.2s;">
+                                    <i class="fa-solid fa-link" style="color: #60a5fa;"></i> 2. فتح رابط الفيديو المكتوب بالأعلى
+                                </button>
+
+                                <button type="button" id="btnAutoFetchYtDriveThumb" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; font-weight: 700; cursor: pointer; padding: 0.65rem 1.25rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; transition: all 0.2s;">
+                                    <i class="fa-solid fa-bolt"></i> 3. جلب غلاف تلقائي (YouTube / Drive)
+                                </button>
+                                
+                                <span class="file-upload-feedback-pill" id="videoScrubFeedback" style="display:none; align-items: center; gap: 0.4rem; font-size: 0.82rem; padding: 0.4rem 0.9rem; border-radius: 999px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700;">
+                                    <i class="fa-solid fa-circle-check"></i> جاهز
+                                </span>
                             </div>
 
-                            <div id="videoScrubContainer" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
-                                <div style="position: relative; max-width: 480px; margin: 0 auto; width: 100%; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--admin-border);">
-                                    <video id="scrubVideoEl" playsinline preload="metadata" style="width: 100%; max-height: 280px; display: block; object-fit: contain;"></video>
-                                    <span id="scrubTimecodeBadge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; font-family: monospace; padding: 2px 6px; border-radius: 4px;">00:00.0</span>
+                            <!-- Interactive Video Player & Frame Controller Box -->
+                            <div id="videoScrubContainer" style="display: none; flex-direction: column; gap: 1rem; margin-top: 1rem; padding: 1.25rem; background: rgba(0,0,0,0.5); border: 1px solid var(--admin-border); border-radius: 14px;">
+                                <!-- Video Stage with Dark Cinematic Surround -->
+                                <div style="position: relative; max-width: 520px; margin: 0 auto; width: 100%; border-radius: 14px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; min-height: 220px;">
+                                    <video id="scrubVideoEl" playsinline preload="metadata" style="width: 100%; max-height: 340px; display: block; object-fit: contain; cursor: pointer;"></video>
+                                    
+                                    <!-- Timecode & Duration Overlay -->
+                                    <span id="scrubTimecodeBadge" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.85); color: #fff; font-size: 0.82rem; font-family: monospace; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);">
+                                        00:00.0 / 00:00.0
+                                    </span>
+
+                                    <!-- Center Play Button Overlay when paused -->
+                                    <button type="button" id="btnCenterPlayVideo" style="position: absolute; width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 113, 227, 0.85); border: none; color: #fff; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+                                        <i class="fa-solid fa-play" style="margin-left: 3px;"></i>
+                                    </button>
                                 </div>
 
-                                <div style="display: flex; align-items: center; gap: 0.75rem; max-width: 480px; margin: 0 auto; width: 100%;">
-                                    <input type="range" id="videoScrubSlider" min="0" max="100" step="0.05" value="0" style="flex: 1; accent-color: var(--admin-blue); cursor: pointer;">
-                                    <span id="videoScrubTimeDisplay" style="font-size: 0.82rem; font-family: monospace; color: var(--admin-text); font-weight: 700; min-width: 65px; text-align: center;">00:00.0</span>
+                                <!-- Scrub Slider & Time Display Row -->
+                                <div style="display: flex; align-items: center; gap: 0.85rem; max-width: 520px; margin: 0 auto; width: 100%;">
+                                    <button type="button" id="btnTogglePlayPause" style="background: rgba(255,255,255,0.08); border: 1px solid var(--admin-border); color: #fff; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        <i class="fa-solid fa-play" id="iconPlayPause"></i>
+                                    </button>
+                                    <input type="range" id="videoScrubSlider" min="0" max="100" step="0.04" value="0" style="flex: 1; accent-color: var(--admin-blue); cursor: pointer; height: 6px; border-radius: 3px;">
+                                    <span id="videoScrubTimeDisplay" style="font-size: 0.88rem; font-family: monospace; color: var(--admin-text); font-weight: 800; min-width: 65px; text-align: center;">00:00.0</span>
                                 </div>
 
+                                <!-- Frame-by-Frame Precision Steppers -->
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap; max-width: 520px; margin: 0 auto; width: 100%;">
+                                    <button type="button" id="btnStepBack5" class="scrub-step-btn" title="تراجع 5 ثواني" style="background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                                        <i class="fa-solid fa-backward-fast"></i> -5s
+                                    </button>
+                                    <button type="button" id="btnStepBack1" class="scrub-step-btn" title="تراجع 1 ثانية" style="background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                                        <i class="fa-solid fa-backward-step"></i> -1s
+                                    </button>
+                                    <button type="button" id="btnStepBackFrame" class="scrub-step-btn" title="فريم للخلف (-0.05 ثانية)" style="background: rgba(0, 113, 227, 0.15); border: 1px solid rgba(0,113,227,0.3); color: var(--admin-blue); font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 6px; font-size: 0.82rem; cursor: pointer;">
+                                        ◀ فريم (-0.05s)
+                                    </button>
+                                    <button type="button" id="btnStepForwardFrame" class="scrub-step-btn" title="فريم للأمام (+0.05 ثانية)" style="background: rgba(0, 113, 227, 0.15); border: 1px solid rgba(0,113,227,0.3); color: var(--admin-blue); font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 6px; font-size: 0.82rem; cursor: pointer;">
+                                        فريم للأمام (+0.05s) ▶
+                                    </button>
+                                    <button type="button" id="btnStepForward1" class="scrub-step-btn" title="تقديم 1 ثانية" style="background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                                        +1s <i class="fa-solid fa-forward-step"></i>
+                                    </button>
+                                    <button type="button" id="btnStepForward5" class="scrub-step-btn" title="تقديم 5 ثواني" style="background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+                                        +5s <i class="fa-solid fa-forward-fast"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Aspect Ratio Crop Option for Capture -->
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; max-width: 520px; margin: 0 auto; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem; font-size: 0.85rem;">
+                                    <span style="color: var(--admin-muted); font-weight: 700;"><i class="fa-solid fa-crop-simple"></i> مقاس اللقطة:</span>
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--admin-text);">
+                                        <input type="radio" name="scrubAspectMode" value="original" checked style="accent-color: var(--admin-blue);"> أبعاد الفيديو الأصلية
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--admin-text);">
+                                        <input type="radio" name="scrubAspectMode" value="vertical" style="accent-color: var(--admin-blue);"> طولي (9:16 Reels)
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--admin-text);">
+                                        <input type="radio" name="scrubAspectMode" value="widescreen" style="accent-color: var(--admin-blue);"> عرضي (16:9 HD)
+                                    </label>
+                                </div>
+
+                                <!-- Main Frame Capture Button -->
                                 <div style="text-align: center; margin-top: 0.25rem;">
-                                    <button type="button" id="btnCaptureVideoFrame" class="btn-unlock" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size: 0.88rem; padding: 0.65rem 1.4rem;">
+                                    <button type="button" id="btnCaptureVideoFrame" class="btn-unlock" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); font-size: 0.95rem; font-weight: 800; padding: 0.8rem 2rem; border-radius: 999px;">
                                         <i class="fa-solid fa-camera"></i> التقاط هذه اللقطة كـ ثامبنيل للعمل 📸
                                     </button>
+                                </div>
+
+                                <!-- Live Captured Thumbnail Preview Card -->
+                                <div id="capturedThumbPreviewCard" style="display: none; max-width: 520px; margin: 0.5rem auto 0 auto; width: 100%; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 1rem; text-align: center;">
+                                    <p style="color: #34d399; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.65rem;">
+                                        <i class="fa-solid fa-circle-check"></i> تم التقاط وتعيين الغلاف بنجاح!
+                                    </p>
+                                    <div style="max-width: 240px; margin: 0 auto; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
+                                        <img id="capturedThumbImgPreview" src="" alt="Thumbnail Preview" style="width: 100%; display: block; object-fit: contain;">
+                                    </div>
+                                    <p id="capturedThumbMeta" style="font-size: 0.75rem; color: var(--admin-muted); font-family: monospace; margin: 0.5rem 0;"></p>
+                                    <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.5rem;">
+                                        <button type="button" id="btnDownloadCapturedThumb" style="background: rgba(255,255,255,0.08); border: 1px solid var(--admin-border); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer;">
+                                            <i class="fa-solid fa-download"></i> حفظ الصورة على جهازك
+                                        </button>
+                                        <button type="button" id="btnClearCapturedThumb" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 0.8rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer;">
+                                            <i class="fa-solid fa-xmark"></i> إزالة
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1500,9 +1588,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/analytics.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/config.js?v=20261014_2"></script>
+    <script src="js/analytics.js?v=20261014_2"></script>
+    <script src="js/admin.js?v=20261014_2"></script>
 </body>
 
 </html>
