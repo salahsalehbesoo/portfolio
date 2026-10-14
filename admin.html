@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الشاملة | Control Center</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+
+    <!-- Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Admin Stylesheet (Local First) -->
+    <link rel="stylesheet" href="css/admin.css">
+
+    <!-- Font Awesome Icons 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="admin-body">
+
+    <!-- ==========================================================================
+         1. Authentication & Login Screen (Modern Pro CMS)
+         ========================================================================== -->
+    <div class="pin-lock-overlay" id="pinLockOverlay">
+        <div class="pin-card" style="max-width: 460px;">
+            <div class="pin-icon-wrap">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h1 class="pin-title">تسجيل الدخول للوحة التحكم</h1>
+            <p class="pin-sub">لوحة إدارة بورتفوليو الفيديو وصناع المحتوى (Pro Control)</p>
+
+            <form id="adminLoginForm" onsubmit="return false;" style="text-align: right;">
+                <!-- Username Input -->
+                <div class="login-field-wrap">
+                    <label class="login-label"><i class="fa-solid fa-user"></i> اسم المستخدم أو البريد:</label>
+                    <div class="login-input-box">
+                        <i class="fa-solid fa-at login-box-icon"></i>
+                        <input type="text" id="adminUsernameInput" class="login-text-input" placeholder="اسم المستخدم (الافتراضي: admin)" value="admin" autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Password / PIN Input -->
+                <div class="login-field-wrap">
+                    <label class="login-label"><i class="fa-solid fa-lock"></i> كلمة المرور أو رمز PIN:</label>
+                    <div class="login-input-box">
+                        <i class="fa-solid fa-key login-box-icon"></i>
+                        <input type="password" id="adminPasswordInput" class="login-text-input" placeholder="أدخل كلمة المرور (الافتراضي: 123456)..." autocomplete="current-password" autofocus>
+                        <button type="button" id="btnToggleLoginPass" class="login-pass-toggle" title="إظهار / إخفاء كلمة المرور">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; font-size: 0.85rem;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--admin-muted); cursor: pointer;">
+                        <input type="checkbox" id="chkRememberMe" checked style="accent-color: var(--admin-blue); width: 16px; height: 16px;">
+                        تذكر تسجيل الدخول
+                    </label>
+                    <button type="button" id="btnForgotPin" class="btn-forgot-pin" style="background: none; border: none; color: var(--admin-blue); cursor: pointer; text-decoration: underline; font-size: 0.82rem;">
+                        نسيت كلمة المرور؟
+                    </button>
+                </div>
+
+                <p class="pin-feedback" id="pinFeedback"></p>
+
+                <button type="button" class="btn-unlock" id="btnUnlock">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول
+                </button>
+            </form>
+
+            <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--admin-muted);">
+                <span>الافتراضي: <strong>admin</strong> / <strong>123456</strong></span>
+                <button type="button" id="btnDirectDefaultLogin" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--admin-emerald); color: #10b981; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
+                    <i class="fa-solid fa-bolt"></i> دخول مباشر بـ 123456
+                </button>
+            </div>
+
+            <!-- PIN Reset Box (Shown when forgot PIN is clicked) -->
+            <div id="pinResetBox" class="pin-reset-box" style="display: none; margin-top: 1.25rem; text-align: right;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">
+                    <i class="fa-solid fa-rotate-left"></i> استعادة وإعادة تعيين كلمة المرور
+                </h3>
+                <p style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.9rem; line-height: 1.5;">
+                    يمكنك إعادة تعيين كلمة المرور إلى الافتراضية بنقرة واحدة، أو التحقق بالبريد / الهاتف المسجل.
+                </p>
+                <div style="margin-bottom: 1rem;">
+                    <button type="button" id="btnResetToDefaultPin" style="width: 100%; padding: 0.75rem; background: rgba(0, 113, 227, 0.15); border: 1px solid var(--admin-blue); color: var(--admin-blue); border-radius: 12px; font-weight: 800; cursor: pointer;">
+                        <i class="fa-solid fa-arrows-rotate"></i> إعادة الضبط للافتراضي (123456) والدخول فوراً
+                    </button>
+                </div>
+                <div style="position: relative; text-align: center; margin: 1rem 0; border-top: 1px dashed var(--admin-border);">
+                    <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--admin-card); padding: 0 8px; font-size: 0.75rem; color: var(--admin-muted);">أو تعيين كلمة مرور جديدة</span>
+                </div>
+                <div class="form-group-admin" style="margin-bottom: 0.65rem;">
+                    <input type="text" id="resetRecoveryContact" class="form-input-admin" placeholder="البريد الإلكتروني أو رقم الهاتف أو مفتاح المطور..." style="text-align: right; font-size: 0.9rem;">
+                </div>
+                <div class="form-group-admin" style="margin-bottom: 0.65rem;">
+                    <input type="password" id="resetNewPin" maxlength="16" class="form-input-admin" placeholder="كلمة المرور الجديدة..." style="text-align: right; font-size: 0.95rem;">
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                    <button type="button" id="btnConfirmResetPin" class="btn-unlock" style="flex: 1; padding: 0.65rem 1rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-check"></i> حفظ الرمز والدخول
+                    </button>
+                    <button type="button" id="btnCancelResetPin" class="btn-cancel-edit" style="padding: 0.65rem 1rem; font-size: 0.85rem;">
+                        إلغاء
+                    </button>
+                </div>
+                <p id="resetPinFeedback" style="font-size: 0.82rem; margin-top: 0.6rem; font-weight: 700;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Top Header Bar for Admin on Phone -->
+    <div class="admin-mobile-topbar">
+        <div class="admin-brand" style="margin-bottom:0; gap:0.6rem;">
+            <div class="admin-brand-icon" style="width:36px; height:36px; font-size:1rem;"><i class="fa-solid fa-sliders"></i></div>
+            <h2 style="font-size:1rem;">PRO CONTROL</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <button type="button" class="admin-mobile-toggle-btn" id="btnAdminMobileLogout" aria-label="Logout" title="تسجيل الخروج" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+            <button type="button" class="admin-mobile-toggle-btn" id="btnAdminMobileToggle" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </div>
+    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
+
+    <!-- ==========================================================================
+         2. Main Admin Dashboard Shell
+         ========================================================================== -->
+    <div class="admin-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div>
+                <div class="admin-brand">
+                    <div class="admin-brand-icon">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div>
+                        <h2>لوحة التحكم</h2>
+                        <span style="font-size: 0.75rem; color: var(--admin-emerald); font-weight: 700;">
+                            <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> محمي ومشفر
+                        </span>
+                    </div>
+                </div>
+
+                <ul class="admin-nav-list" id="adminNavList">
+                    <li class="admin-nav-item active" data-tab="tabAnalytics">
+                        <button type="button"><i class="fa-solid fa-chart-line"></i> إحصائيات الزوار</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabProfileCard">
+                        <button type="button"><i class="fa-solid fa-id-card"></i> اللوجو وبطاقة التعريف</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabNavbar">
+                        <button type="button"><i class="fa-solid fa-bars-staggered"></i> القائمة والمنسدلة</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabProjects">
+                        <button type="button"><i class="fa-solid fa-film"></i> معرض الأعمال</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabTutorials">
+                        <button type="button"><i class="fa-solid fa-graduation-cap"></i> الدروس والمقالات</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabStore">
+                        <button type="button"><i class="fa-solid fa-bag-shopping"></i> متجر القوالب</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabSectionsVisibility">
+                        <button type="button" style="color: #38bdf8; font-weight: 700;"><i class="fa-solid fa-eye"></i> إظهار وإخفاء الأقسام (👁️)</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabBranding">
+                        <button type="button"><i class="fa-solid fa-palette"></i> الألوان والمظهر</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabPricing">
+                        <button type="button"><i class="fa-solid fa-calculator"></i> حاسبة الأسعار</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabProfile">
+                        <button type="button"><i class="fa-solid fa-user-gear"></i> البيانات وواتساب</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabReviews">
+                        <button type="button"><i class="fa-solid fa-comments"></i> إدارة التقييمات</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabActivation" id="navItemActivation">
+                        <button type="button" style="color: var(--admin-emerald); font-weight: 800;"><i class="fa-solid fa-certificate"></i> تفعيل الترخيص (License)</button>
+                    </li>
+                    <li class="admin-nav-item" data-tab="tabDeploy" id="navItemDeploy">
+                        <button type="button" style="color: #60a5fa; font-weight: 800;"><i class="fa-brands fa-github"></i> النشر وتصدير الكود (GitHub)</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="admin-bottom-actions">
+                <button type="button" class="btn-sidebar-action" id="btnQuickExport" style="color: #60a5fa; font-weight: 700;">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> تحميل كود الموقع (config.js)
+                </button>
+                <a href="index.html" target="_blank" class="btn-sidebar-action">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> معاينة موقع الزوار
+                </a>
+                <button type="button" class="btn-sidebar-action" id="btnLogoutAdmin" style="color: #ef4444; font-weight: 700;">
+                    <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="admin-main">
+
+            <!-- TAB 1: VISITOR ANALYTICS -->
+            <div class="admin-tab-pane active" id="tabAnalytics">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إحصائيات وحركة الزوار</h1>
+                        <p>تتبع فوري ومجاني للزوار الجدد، الزوار العائدين، ونشاط العملاء على موقعك.</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-value" id="statTotalVisits">0</span>
+                            <span class="stat-title">إجمالي الزيارات</span>
+                        </div>
+                        <div class="stat-badge-icon badge-blue"><i class="fa-solid fa-users"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-value" id="statUniqueVisitors">0</span>
+                            <span class="stat-title">زوار جدد (New)</span>
+                        </div>
+                        <div class="stat-badge-icon badge-emerald"><i class="fa-solid fa-user-plus"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-value" id="statReturningVisits">0</span>
+                            <span class="stat-title">زوار عائدون (Returning)</span>
+                        </div>
+                        <div class="stat-badge-icon badge-purple"><i class="fa-solid fa-arrow-rotate-left"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-value" id="statWaClicks">0</span>
+                            <span class="stat-title">تحويلات لواتساب</span>
+                        </div>
+                        <div class="stat-badge-icon badge-amber"><i class="fa-brands fa-whatsapp"></i></div>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>سجل آخر الزيارات اللحظية</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>الوقت والتاريخ</th>
+                                    <th>نوع الزائر</th>
+                                    <th>الجهاز</th>
+                                    <th>المصدر (Referrer)</th>
+                                    <th>معرف الجلسة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="visitsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LOGO & PROFILE ID CARD -->
+            <div class="admin-tab-pane" id="tabProfileCard">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>اللوجو وبطاقة التعريف (Profile ID Card)</h1>
+                        <p>خصص شعار الموقع، صورة هويتك الشخصية، غلاف الكارت، والبيانات التعريفية مع إمكانية الرفع من الجهاز أو عبر الرابط.</p>
+                    </div>
+                </div>
+
+                <div class="profile-card-preview-wrap">
+                    <!-- Form Controls -->
+                    <div>
+                        <!-- Logo Customizer -->
+                        <div class="admin-panel-card">
+                            <div class="panel-card-head">
+                                <h3><i class="fa-solid fa-fingerprint"></i> شعار الموقع (Site Logo)</h3>
+                            </div>
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">نص الشعار الرئيسي (Text Logo)</label>
+                                    <input type="text" id="logoText" class="form-input-admin" placeholder="مثال: CREATIVE أو STUDIO">
+                                </div>
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الشارة الفرعية (Badge)</label>
+                                    <input type="text" id="logoBadge" class="form-input-admin" placeholder="مثال: PORTFOLIO أو EDITS">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">صورة اللوجو (رفع من الجهاز أو عبر رابط):</label>
+                                <div class="dual-upload-field">
+                                    <div class="file-upload-actions-row">
+                                        <label for="logoFileInput" class="file-upload-btn-label">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع اللوجو من الجهاز
+                                        </label>
+                                        <input type="file" id="logoFileInput" class="file-upload-hidden-input" accept="image/*">
+                                        <span class="file-upload-feedback-pill" id="logoUploadFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم اختيار ملف اللوجو</span>
+                                    </div>
+                                    <input type="text" id="logoImgUrl" class="form-input-admin" placeholder="أو الصق رابط صورة PNG شفافة هنا...">
+                                </div>
+                            </div>
+
+                            <!-- Favicon Customizer -->
+                            <div class="form-group-admin" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--admin-border);">
+                                <label class="form-label-admin" style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span><i class="fa-solid fa-icons"></i> أيقونة التبويب في المتصفح (Favicon):</span>
+                                    <span style="font-size:0.75rem; color:var(--admin-muted);">تظهر في شريط علامات التبويب أعلى المتصفح</span>
+                                </label>
+                                <div class="dual-upload-field">
+                                    <div class="file-upload-actions-row">
+                                        <label for="favFileInput" class="file-upload-btn-label">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع Favicon من الجهاز
+                                        </label>
+                                        <input type="file" id="favFileInput" class="file-upload-hidden-input" accept="image/*,.ico,.svg">
+                                        <span class="file-upload-feedback-pill" id="favUploadFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم اختيار الأيقونة</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <input type="text" id="favImgUrl" class="form-input-admin" placeholder="أو رابط أيقونة SVG / PNG / ICO...">
+                                        <div id="favPreviewBox" style="width:38px; height:38px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid var(--admin-border); display:flex; align-items:center; justify-content:center; flex-shrink:0;" title="معاينة أيقونة Favicon الحالية">
+                                            <img id="favPreviewImg" src="img/favicon.svg" alt="Favicon" style="max-width:24px; max-height:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ID Card Details -->
+                        <div class="admin-panel-card">
+                            <div class="panel-card-head">
+                                <h3><i class="fa-solid fa-id-badge"></i> بطاقة التعريف الشخصية (ID Card)</h3>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الصورة الشخصية (Avatar):</label>
+                                    <div class="dual-upload-field">
+                                        <div class="file-upload-actions-row">
+                                            <label for="profAvatarFile" class="file-upload-btn-label">
+                                                <i class="fa-solid fa-cloud-arrow-up"></i> رفع وقص صورة جديدة
+                                            </label>
+                                            <input type="file" id="profAvatarFile" class="file-upload-hidden-input" accept="image/*">
+                                            <button type="button" id="btnResetAvatarDefault" class="btn-secondary-admin" style="padding:0.45rem 0.9rem; font-size:0.82rem;" title="استعادة الصورة الافتراضية الأصلية (إزالة أي قص قديم)">
+                                                <i class="fa-solid fa-rotate-left"></i> افتراضي
+                                            </button>
+                                            <span class="file-upload-feedback-pill" id="profAvatarFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم الرفع</span>
+                                        </div>
+                                        <input type="text" id="profAvatar" class="form-input-admin" placeholder="أو رابط الصورة الشخصية...">
+                                    </div>
+                                </div>
+
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">صورة غلاف البطاقة (Banner Cover):</label>
+                                    <div class="dual-upload-field">
+                                        <div class="file-upload-actions-row">
+                                            <label for="profCoverFile" class="file-upload-btn-label">
+                                                <i class="fa-solid fa-cloud-arrow-up"></i> رفع الغلاف من الجهاز
+                                            </label>
+                                            <input type="file" id="profCoverFile" class="file-upload-hidden-input" accept="image/*">
+                                            <span class="file-upload-feedback-pill" id="profCoverFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم الرفع</span>
+                                        </div>
+                                        <input type="text" id="profCover" class="form-input-admin" placeholder="أو رابط صورة الغلاف...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الاسم (بالعربية) *</label>
+                                    <input type="text" id="profNameAr" class="form-input-admin" placeholder="مثال: أحمد محمد | مونتير سينمائي" required>
+                                </div>
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الاسم (بالإنجليزية) *</label>
+                                    <input type="text" id="profNameEn" class="form-input-admin" placeholder="مثال: Alex Edits | Video Creator" required>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">المسمى الوظيفي (بالعربية) *</label>
+                                    <input type="text" id="profRoleAr" class="form-input-admin" placeholder="مثال: مونتير فيديو ومصمم موشن جرافيكس" required>
+                                </div>
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">المسمى الوظيفي (بالإنجليزية)</label>
+                                    <input type="text" id="profRoleEn" class="form-input-admin" placeholder="مثال: High-Retention Video Editor">
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">سنوات الخبرة</label>
+                                    <input type="number" id="profExpYears" class="form-input-admin" placeholder="4">
+                                </div>
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">حالة العمل والاتصال (Work Status):</label>
+                                    <select id="profWorkStatus" class="form-select-admin">
+                                        <option value="online">🟢 متصل ومتاح للعمل (Online)</option>
+                                        <option value="busy">🟡 في عمل حالياً / مشغول (In Work / Busy)</option>
+                                        <option value="offline">⚪ غير متصل / خارج الدوام (Offline)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">نص التوفر والجدول الزمني (Availability Timeline):</label>
+                                <input type="text" id="profAvailabilityText" class="form-input-admin" placeholder="مثال: متاح الآن لمشاريع جديدة / متاح للبدء بعد يومين / متاح بعد 5 ساعات">
+                                <small style="color:var(--admin-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">
+                                    يظهر هذا النص في بادج الحالة تحت صورتك في الصفحة الرئيسية (مثلاً لتخبر الزائر بموعد توفرك إذا كنت مشغولاً).
+                                </small>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الوصف التعريفي (Bio - بالعربية)</label>
+                                    <textarea id="profBioAr" rows="3" class="form-textarea-admin" placeholder="اكتب نبذة احترافية عنك وعن أسلوب عملك..."></textarea>
+                                </div>
+                                <div class="form-group-admin">
+                                    <label class="form-label-admin">الوصف التعريفي (Bio - بالإنجليزية)</label>
+                                    <textarea id="profBioEn" rows="3" class="form-textarea-admin" placeholder="Write a punchy English bio for your profile card..."></textarea>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-unlock" id="btnSaveProfileCard" style="width: auto; padding: 0.9rem 2.2rem;">
+                                <i class="fa-solid fa-floppy-disk"></i> حفظ الشعار وبطاقة التعريف فوراً
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Display -->
+                    <div>
+                        <div class="panel-card-head" style="margin-bottom: 0.75rem;">
+                            <h3>معاينة حية للبطاقة</h3>
+                        </div>
+                        <div class="profile-id-card-display">
+                            <div class="id-card-cover">
+                                <img id="previewCardCover" src="img/default-cover.svg" alt="Cover">
+                            </div>
+                            <div class="id-card-body">
+                                <div class="id-card-avatar-wrap">
+                                    <img id="previewCardAvatar" src="img/default-avatar.svg" alt="Avatar">
+                                    <span class="id-card-status-dot" title="متصل ومتاح"></span>
+                                </div>
+                                <h4 class="id-card-name" id="previewCardName">الاسم واللقب</h4>
+                                <div class="id-card-role" id="previewCardRole">المسمى الوظيفي</div>
+                                <p class="id-card-bio" id="previewCardBio">الوصف التعريفي للبطاقة يظهر هنا...</p>
+                                <div class="id-card-badges">
+                                    <span class="id-badge" id="previewCardExp"><i class="fa-solid fa-award"></i> 4 سنوات خبرة</span>
+                                    <span class="id-badge" style="color: var(--admin-emerald);"><i class="fa-solid fa-circle"></i> متاح للعمل</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DYNAMIC NAVBAR & DROPDOWNS MANAGER -->
+            <div class="admin-tab-pane" id="tabNavbar">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إدارة القائمة والروابط المنسدلة</h1>
+                        <p>أضف أو احذف روابط القائمة الرئيسية العلوية، ونظّم القوائم المنسدلة بسهولة فائقة.</p>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Nav Item Form -->
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3 id="navFormTitle"><i class="fa-solid fa-plus"></i> إضافة عنصر جديد للقائمة الرئيسية</h3>
+                    </div>
+                    <form id="addNavItemForm">
+                        <input type="hidden" id="editNavItemIndex" value="">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">عنوان الرابط (بالعربية) *</label>
+                                <input type="text" id="navLabelAr" class="form-input-admin" placeholder="مثال: من نحن أو الاستشارة" required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">عنوان الرابط (بالإنجليزية) *</label>
+                                <input type="text" id="navLabelEn" class="form-input-admin" placeholder="مثال: About Us" required>
+                            </div>
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">الرابط أو المعرف (URL / Anchor) *</label>
+                            <input type="text" id="navUrl" class="form-input-admin" placeholder="مثال: index.html#about أو https://... أو #" required>
+                        </div>
+                        <div style="display:flex; gap:0.75rem; align-items:center;">
+                            <button type="submit" id="btnSubmitNavItem" class="btn-unlock" style="width: auto; padding: 0.8rem 2rem;">
+                                <i class="fa-solid fa-plus"></i> إضافة الرابط للقائمة
+                            </button>
+                            <button type="button" id="btnCancelEditNavItem" class="btn-cancel-edit" style="display:none; padding:0.8rem 1.5rem;">
+                                <i class="fa-solid fa-xmark"></i> إلغاء التعديل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Current Nav Items List -->
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>عناصر القائمة المعروضة حالياً</h3>
+                        <button type="button" id="btnResetNavbar" style="background: none; border: 1px solid var(--admin-border); color: var(--admin-muted); padding: 0.4rem 0.9rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+                            <i class="fa-solid fa-rotate-left"></i> استعادة القائمة الافتراضية
+                        </button>
+                    </div>
+                    <div id="navItemsManagerList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 4: PROJECTS MANAGER -->
+            <div class="admin-tab-pane" id="tabProjects">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إدارة معرض الأعمال</h1>
+                        <p>أضف فيديوهات جديدة، احذف القديمة، أو عدّل روابط المشاريع بسهولة.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-unlock" id="btnProjectsQuickExport" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> تصدير الكود (config.js)
+                        </button>
+                        <button type="button" class="btn-unlock" id="btnProjectsQuickWipe" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--admin-crimson); color: #ef4444;">
+                            <i class="fa-solid fa-trash-can"></i> تفريغ الأعمال الافتراضية
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>+ إضافة فيديو جديد إلى المعرض</h3>
+                    </div>
+
+                    <form id="addProjectForm">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">عنوان الفيديو أو المشروع *</label>
+                                <input type="text" id="newTitle" class="form-input-admin" placeholder="مثال: ريل إعلاني لبراند مجوهرات" required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">رابط الفيديو (YouTube / Drive / MP4) *</label>
+                                <input type="url" id="newUrl" class="form-input-admin" placeholder="https://drive.google.com/file/d/... أو يوتيوب" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">التصنيف *</label>
+                                <select id="newCat" class="form-select-admin">
+                                    <option value="shorts">فيديوهات قصيرة (ريلز 9:16)</option>
+                                    <option value="long">فيديوهات طويلة (يوتيوب 16:9)</option>
+                                </select>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">مقاس العرض *</label>
+                                <select id="newAspect" class="form-select-admin">
+                                    <option value="vertical">طولي (9:16 Vertical Reel)</option>
+                                    <option value="widescreen">عرضي (16:9 Widescreen)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">البرامج المستخدمة</label>
+                                <input type="text" id="newSoftware" class="form-input-admin" placeholder="مثال: DaVinci Resolve • After Effects">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">وسم الكارت (Tag)</label>
+                                <input type="text" id="newTag" class="form-input-admin" placeholder="مثال: إعلاني، سينمائي، وثائقي">
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="editProjectId" value="">
+
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">صورة الثمبنيل (رفع من الجهاز أو رابط):</label>
+                            <div class="dual-upload-field">
+                                <div class="file-upload-actions-row">
+                                    <label for="newThumbFile" class="file-upload-btn-label">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> رفع الثمبنيل من الجهاز
+                                    </label>
+                                    <input type="file" id="newThumbFile" class="file-upload-hidden-input" accept="image/*">
+                                    <span class="file-upload-feedback-pill" id="newThumbFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم الرفع</span>
+                                </div>
+                                <input type="text" id="newThumbnail" class="form-input-admin" placeholder="أو ضع رابط صورة الثمبنيل...">
+                            </div>
+                        </div>
+
+                        <!-- Video Frame Scrubber for Thumbnail Extraction -->
+                        <div class="video-scrubber-box" style="margin-top: 1rem; padding: 1.25rem; background: rgba(0, 113, 227, 0.05); border: 1px dashed rgba(0, 113, 227, 0.35); border-radius: 12px;">
+                            <label class="form-label-admin" style="color: var(--admin-blue); font-weight: 800; display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fa-solid fa-camera-retro"></i> استخراج ثامبنيل من لقطة بالفيديو (Video Frame Scrubber):
+                            </label>
+                            <p style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.75rem;">
+                                اختر ملف فيديو من جهازك، حرّك شريط التمرير إلى اللقطة التي تريدها بالضبط، ثم اضغط التقاط لتصبح الثمبنيل الرسمي للعمل.
+                            </p>
+                            
+                            <div class="file-upload-actions-row" style="margin-bottom: 0.75rem;">
+                                <label for="videoScrubFileInput" class="file-upload-btn-label" style="background: rgba(0, 113, 227, 0.15); border-color: rgba(0, 113, 227, 0.3); color: var(--admin-blue);">
+                                    <i class="fa-solid fa-video"></i> اختيار فيديو من الجهاز لتمرير اللقطات
+                                </label>
+                                <input type="file" id="videoScrubFileInput" class="file-upload-hidden-input" accept="video/*">
+                                <span class="file-upload-feedback-pill" id="videoScrubFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم تحميل الفيديو</span>
+                            </div>
+
+                            <div id="videoScrubContainer" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
+                                <div style="position: relative; max-width: 480px; margin: 0 auto; width: 100%; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--admin-border);">
+                                    <video id="scrubVideoEl" playsinline preload="metadata" style="width: 100%; max-height: 280px; display: block; object-fit: contain;"></video>
+                                    <span id="scrubTimecodeBadge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; font-family: monospace; padding: 2px 6px; border-radius: 4px;">00:00.0</span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 0.75rem; max-width: 480px; margin: 0 auto; width: 100%;">
+                                    <input type="range" id="videoScrubSlider" min="0" max="100" step="0.05" value="0" style="flex: 1; accent-color: var(--admin-blue); cursor: pointer;">
+                                    <span id="videoScrubTimeDisplay" style="font-size: 0.82rem; font-family: monospace; color: var(--admin-text); font-weight: 700; min-width: 65px; text-align: center;">00:00.0</span>
+                                </div>
+
+                                <div style="text-align: center; margin-top: 0.25rem;">
+                                    <button type="button" id="btnCaptureVideoFrame" class="btn-unlock" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size: 0.88rem; padding: 0.65rem 1.4rem;">
+                                        <i class="fa-solid fa-camera"></i> التقاط هذه اللقطة كـ ثامبنيل للعمل 📸
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem;">
+                            <button type="submit" id="btnSubmitProject" class="btn-unlock" style="width: auto; padding: 0.8rem 2rem;">
+                                <i class="fa-solid fa-plus" id="iconSubmitProject"></i> <span id="textSubmitProject">حفظ ونشر الفيديو فوراً</span>
+                            </button>
+                            <button type="button" id="btnCancelEditProject" class="btn-secondary-admin" style="display: none; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); border-radius: 10px; cursor: pointer; font-weight: 700;">
+                                <i class="fa-solid fa-xmark"></i> إلغاء وضع التعديل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>المشاريع المعروضة حالياً</h3>
+                    </div>
+                    <div id="adminProjectsList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 5: TUTORIALS & BLOG MANAGER (With Blogger Rich Text Formatter + Dual Thumb/Cover Uploads) -->
+            <div class="admin-tab-pane" id="tabTutorials">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إدارة الدروس والمقالات</h1>
+                        <p>محرر متكامل بأسلوب بلوجر (تنسيق نصوص، صور، عناوين، نقاط) مع دعم ثمبنيل للبطاقة وصورة رأس مخصصة للمقال.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3 id="tutFormTitle"><i class="fa-solid fa-feather"></i> + نشر درس / مقال جديد متكامل (محرر بلوجر)</h3>
+                    </div>
+
+                    <form id="addTutorialForm">
+                        <input type="hidden" id="editTutorialId" value="">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">عنوان الدرس أو المقال *</label>
+                                <input type="text" id="tutTitle" class="form-input-admin" placeholder="مثال: كيف تحترف التلوين السينمائي في دافينشي" required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">التصنيف *</label>
+                                <input type="text" id="tutCatName" class="form-input-admin" placeholder="مثال: تلوين سينمائي / نصائح مونتاج" required>
+                            </div>
+                        </div>
+
+                        <!-- 1. Card Thumbnail Upload -->
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">1. صورة الثمبنيل (تظهر في كارت المعرض):</label>
+                                <div class="dual-upload-field">
+                                    <div class="file-upload-actions-row">
+                                        <label for="tutThumbFile" class="file-upload-btn-label">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع الثمبنيل من الجهاز
+                                        </label>
+                                        <input type="file" id="tutThumbFile" class="file-upload-hidden-input" accept="image/*">
+                                        <span class="file-upload-feedback-pill" id="tutThumbFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم الرفع</span>
+                                    </div>
+                                    <input type="text" id="tutThumbnail" class="form-input-admin" placeholder="أو رابط صورة الثمبنيل للبطاقة...">
+                                </div>
+                            </div>
+
+                            <!-- 2. Header Cover Image Upload -->
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">2. صورة رأس المقال (تظهر في بداية المقال عند فتحه):</label>
+                                <div class="dual-upload-field">
+                                    <div class="file-upload-actions-row">
+                                        <label for="tutCoverFile" class="file-upload-btn-label">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع صورة الرأس من الجهاز
+                                        </label>
+                                        <input type="file" id="tutCoverFile" class="file-upload-hidden-input" accept="image/*">
+                                        <span class="file-upload-feedback-pill" id="tutCoverFeedback" style="display:none;"><i class="fa-solid fa-circle-check"></i> تم الرفع</span>
+                                    </div>
+                                    <input type="text" id="tutCoverImg" class="form-input-admin" placeholder="أو رابط صورة رأس المقال...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">وقت القراءة التقريبي</label>
+                                <input type="text" id="tutReadTime" class="form-input-admin" placeholder="مثال: 5 دقائق قراءة" value="5 دقائق قراءة">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">ملخص موجز يظهر في الكارت *</label>
+                                <input type="text" id="tutSummary" class="form-input-admin" placeholder="شرح مبسط في سطرين عن محتوى المقال..." required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">فهرس المحتويات (عناوين الـ Table of Contents مفصولة بفاصلة):</label>
+                            <input type="text" id="tutTocInput" class="form-input-admin" placeholder="مثال: قاعدة أول 3 ثوانٍ, تناسق الموسيقى, هندسة الصوت, الخلاصة">
+                            <span class="form-label-desc">سيتم إنشاء أزرار قفز تفاعلية فورية في بداية المقال لكل عنوان</span>
+                        </div>
+
+                        <!-- 3. Blogger-Style Rich Text Editor & Formatting Toolbar -->
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">محتوى المقال (شريط أدوات وتنسيق كامل مثل بلوجر) *</label>
+                            <div class="rich-editor-wrapper">
+                                <div class="rich-toolbar">
+                                    <button type="button" class="editor-btn" data-cmd="bold" title="خط عريض"><i class="fa-solid fa-bold"></i> عريض</button>
+                                    <button type="button" class="editor-btn" data-cmd="italic" title="خط مائل"><i class="fa-solid fa-italic"></i> مائل</button>
+                                    <button type="button" class="editor-btn" data-cmd="underline" title="تسطير"><i class="fa-solid fa-underline"></i> تسطير</button>
+                                    <div class="editor-divider"></div>
+                                    <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="h2" title="عنوان رئيسي"><i class="fa-solid fa-heading"></i> عنوان H2</button>
+                                    <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="h3" title="عنوان فرعي"><i class="fa-solid fa-heading"></i> عنوان H3</button>
+                                    <div class="editor-divider"></div>
+                                    <button type="button" class="editor-btn" data-cmd="insertUnorderedList" title="قائمة نقطية"><i class="fa-solid fa-list-ul"></i> نقاط</button>
+                                    <button type="button" class="editor-btn" data-cmd="insertOrderedList" title="قائمة مرقمة"><i class="fa-solid fa-list-ol"></i> أرقام</button>
+                                    <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="blockquote" title="اقتباس"><i class="fa-solid fa-quote-left"></i> اقتباس</button>
+                                    <div class="editor-divider"></div>
+                                    <label class="editor-btn" style="cursor:pointer;" title="إدراج صورة من الجهاز داخل المقال">
+                                        <i class="fa-solid fa-image"></i> صورة من الجهاز
+                                        <input type="file" id="tutInlineImgFile" class="file-upload-hidden-input" accept="image/*">
+                                    </label>
+                                    <button type="button" class="editor-btn" id="btnInsertImageUrl" title="إدراج صورة برابط"><i class="fa-solid fa-link"></i> صورة برابط</button>
+                                    <button type="button" class="editor-btn" id="btnInsertLink" title="إدراج رابط"><i class="fa-solid fa-paperclip"></i> رابط</button>
+                                    <button type="button" class="editor-btn" data-cmd="removeFormat" title="مسح التنسيق"><i class="fa-solid fa-eraser"></i></button>
+                                </div>
+                                <div class="rich-editor-content" id="tutRichEditor" contenteditable="true" placeholder="اكتب متن المقال هنا... يمكنك تظليل أي نص لتكبيره كعنوان أو تحويله لنقاط أو إضافة صور داخل الشرح مباشرة من جهازك!"></div>
+                                <textarea id="tutContent" style="display:none;"></textarea>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <button type="submit" class="btn-unlock" id="btnSubmitTut" style="width: auto; padding: 0.9rem 2.5rem;">
+                                <i class="fa-solid fa-pen-nib"></i> نشر المقال بالتنسيق الكامل فوراً
+                            </button>
+                            <button type="button" id="btnCancelEditTut" class="btn-cancel-edit" style="display: none;">
+                                <i class="fa-solid fa-xmark"></i> إلغاء التعديل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>المقالات والدروس المنشورة</h3>
+                    </div>
+                    <div id="adminTutorialsList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 6: STORE & TEMPLATES MANAGER -->
+            <div class="admin-tab-pane" id="tabStore">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إدارة متجر القوالب والملحقات</h1>
+                        <p>أضف حزم LUTs، مؤثرات صوتية، أو قوالب موشن للبيع مع تحديد السعر والخصائص.</p>
+                    </div>
+                </div>
+
+                <!-- Store Master Toggle Switch -->
+                <div class="admin-panel-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <h3 style="font-size:1.15rem; color:#fff; margin-bottom:0.3rem;">
+                            <i class="fa-solid fa-store"></i> حالة متجر القوالب (Store Status)
+                        </h3>
+                        <p style="font-size:0.85rem; color:var(--admin-muted); margin:0;">
+                            تحكم بظهور أو إخفاء المتجر كلياً على الموقع. عند إيقافه، يُخفى رابط المتجر من شريط التنقل للزوار.
+                        </p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.9rem;">
+                        <span id="storeStatusBadge" style="padding:0.35rem 0.85rem; border-radius:9999px; font-weight:800; font-size:0.85rem; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald);">
+                            مفعل 🟢
+                        </span>
+                        <button type="button" id="btnToggleStoreActive" class="btn-unlock" style="width:auto; padding:0.6rem 1.4rem; font-size:0.88rem;">
+                            <i class="fa-solid fa-power-off"></i> إيقاف المتجر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3 id="prodFormTitle"><i class="fa-solid fa-cart-plus"></i> + إضافة منتج / قالب رقمي جديد للبيع</h3>
+                    </div>
+
+                    <form id="addProductForm">
+                        <input type="hidden" id="editProductId" value="">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">اسم الحزمة أو القالب *</label>
+                                <input type="text" id="prodTitle" class="form-input-admin" placeholder="مثال: حزمة LUTs السينمائية الشاملة" required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">السعر بالدولار ($) *</label>
+                                <input type="number" id="prodPrice" class="form-input-admin" placeholder="29" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">شارة تمييزية (Badge اختياري)</label>
+                                <input type="text" id="prodBadge" class="form-input-admin" placeholder="مثال: الأكثر مبيعاً 🔥 أو جديد ⚡">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">وصف موجز للمنتج *</label>
+                                <input type="text" id="prodDesc" class="form-input-admin" placeholder="مثال: 30 ملف LUT احترافي متوافق مع كافة الكاميرات..." required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">المميزات الرئيسية (افصل بين كل ميزة بفاصلة أو سطر جديد)</label>
+                            <textarea id="prodFeatures" rows="3" class="form-textarea-admin" placeholder="30 ملف .cube عالي الدقة&#10;شرح فيديو للتركيب&#10;تحديثات مجانية مدى الحياة"></textarea>
+                        </div>
+
+                        <div style="display:flex; gap:0.75rem; align-items:center;">
+                            <button type="submit" id="btnSubmitProd" class="btn-unlock" style="width: auto; padding: 0.8rem 2rem;">
+                                <i class="fa-solid fa-cart-plus"></i> إضافة المنتج للمتجر فوراً
+                            </button>
+                            <button type="button" id="btnCancelEditProd" class="btn-cancel-edit" style="display:none; padding:0.8rem 1.5rem;">
+                                <i class="fa-solid fa-xmark"></i> إلغاء التعديل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                        <h3>المنتجات المعروضة في المتجر</h3>
+                        <button type="button" id="btnRestoreDefaultProducts" style="background:rgba(0,113,227,0.12); border:1px solid rgba(0,113,227,0.3); color:var(--admin-blue); padding:0.45rem 1rem; border-radius:8px; cursor:pointer; font-size:0.83rem; font-weight:700;">
+                            <i class="fa-solid fa-rotate-left"></i> استعادة الـ 3 منتجات الافتراضية للمتجر
+                        </button>
+                    </div>
+                    <div id="adminProductsList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 7: BRANDING STUDIO -->
+            <div class="admin-tab-pane" id="tabBranding">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>تخصيص الألوان والمظهر</h1>
+                        <p>اختر لون البراند الذي تفضله وتحكّم في تأثيرات الخلفية.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>لون التمييز الأساسي (Primary Accent Color)</h3>
+                    </div>
+                    <div class="swatches-grid">
+                        <button type="button" class="color-swatch-btn" data-color="#0071e3" style="background:#0071e3;" title="أزرق أبل الكلاسيكي"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="بنفسجي سايبر نيون"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#10b981" style="background:#10b981;" title="أخضر زمردي فاخر"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="ذهبي ملكي"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background:#ef4444;" title="أحمر قرمزي ناري"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#06b6d4" style="background:#06b6d4;" title="سيان نيون كهربائي"></button>
+                    </div>
+
+                    <div class="custom-color-picker-wrap">
+                        <label class="form-label-admin" style="margin-bottom:0;">أو اختر لوناً مخصصاً:</label>
+                        <input type="color" id="customColorInput" style="width: 44px; height: 38px; border: none; background: none; cursor: pointer;">
+                    </div>
+
+                    <div class="toggle-switch-row" style="margin-top: 1.5rem;">
+                        <div>
+                            <strong style="display:block;">تفعيل خلفية الجزيئات الكونية (Lightweight Particles)</strong>
+                            <span style="font-size:0.85rem; color:var(--admin-muted);">جزيئات خفيفة جداً وعالية الأداء 60-120 FPS بدون أي بطء</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleParticles" checked>
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+
+                    <!-- Default Language Selector -->
+                    <div class="form-group-admin" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--admin-border);">
+                        <label class="form-label-admin">
+                            <i class="fa-solid fa-globe"></i> لغة العرض الافتراضية للزوار الجدد (Default Site Language):
+                        </label>
+                        <select id="defaultSiteLangSelect" class="form-select-admin" style="max-width: 320px;">
+                            <option value="ar">العربية (Arabic - RTL) [الافتراضي]</option>
+                            <option value="en">English (English - LTR)</option>
+                        </select>
+                        <small style="color:var(--admin-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">
+                            اللغة التي تفتح بها الصفحة تلقائياً لأي زائر جديد يزور موقعك لأول مرة.
+                        </small>
+                    </div>
+
+                    <!-- Footer Customization (White-Label Enabled) -->
+                    <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--admin-border);">
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; color: #6ee7b7; font-size: 0.88rem; display: flex; align-items: center; gap: 0.85rem;">
+                            <i class="fa-solid fa-crown" style="font-size: 1.4rem; color: #10b981;"></i>
+                            <div>
+                                <strong style="color: #fff; display: block; margin-bottom: 0.2rem;">ترخيص White-Label مفعّل ✨</strong>
+                                مسموح لك بتخصيص نص ورابط وحقوق الفوتر باسمك وبياناتك الشخصية بالكامل بحرية تامة.
+                            </div>
+                        </div>
+                        <h4 style="font-size:0.95rem; font-weight:800; color:#fff; margin-bottom:0.75rem;">
+                            <i class="fa-solid fa-copyright"></i> نصوص الحقوق والتذييل أسفل الموقع (Footer):
+                        </h4>
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">نص الحقوق (بالعربية)</label>
+                                <input type="text" id="footerRightsArInput" class="form-input-admin" placeholder="جميع الحقوق محفوظة © 2026">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">نص الحقوق (بالإنجليزية)</label>
+                                <input type="text" id="footerRightsEnInput" class="form-input-admin" placeholder="All rights reserved © 2026">
+                            </div>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">نص المطور / التوقيع (بالعربية)</label>
+                                <input type="text" id="footerDevArInput" class="form-input-admin" placeholder="تصميم وبرمجة خاصة بأعلى معايير السرعة والأمان.">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">نص المطور / التوقيع (بالإنجليزية)</label>
+                                <input type="text" id="footerDevEnInput" class="form-input-admin" placeholder="Crafted with peak performance and security.">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button type="button" class="btn-unlock" id="btnSaveBranding" style="width: auto; padding: 0.8rem 2rem;">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ المظهر واللغة والحقوق
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 8: PRICING CONFIGURATOR -->
+            <div class="admin-tab-pane" id="tabPricing">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إعدادات أسعار الباقات</h1>
+                        <p>عدل الأسعار الأساسية للريلز والفيديوهات الطويلة والبودكاست لتتحدث في الحاسبة فوراً.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <h3 style="margin-bottom: 1.25rem;">أسعار الريلز (بالدولار الأمريكي $):</h3>
+                    <div class="form-grid-3">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">أقل من دقيقة (60 ث):</label>
+                            <input type="number" id="rateShorts60" class="form-input-admin" value="35">
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">دقيقة ونصف (90 ث):</label>
+                            <input type="number" id="rateShorts90" class="form-input-admin" value="45">
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">دقيقتان (120 ث):</label>
+                            <input type="number" id="rateShorts120" class="form-input-admin" value="55">
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 1.5rem 0 1.25rem 0;">أسعار الفيديوهات الطويلة:</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">موشن بسيط (لأول 8 دقائق):</label>
+                            <input type="number" id="rateLongSimple" class="form-input-admin" value="60">
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">موشن مكثف (لأول 8 دقائق):</label>
+                            <input type="number" id="rateLongHeavy" class="form-input-admin" value="80">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button type="button" class="btn-unlock" id="btnSavePricing" style="width: auto; padding: 0.8rem 2rem;">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ وتحديث الأسعار
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 9: PROFILE & WHATSAPP -->
+            <div class="admin-tab-pane" id="tabProfile">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>البيانات الشخصية وواتساب</h1>
+                        <p>عدل اسمك، لقائك، ورقم الواتساب الذي يستقبل رسائل الحجز التلقائية.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="form-grid-2">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">الاسم الظاهر في الموقع *</label>
+                            <input type="text" id="profName" class="form-input-admin" required>
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">المسمى الوظيفي / التخصص *</label>
+                            <input type="text" id="profRole" class="form-input-admin" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">رقم الواتساب بالصيغة الدولية (بدون + أو مسافات) *</label>
+                            <input type="text" id="profWhatsapp" class="form-input-admin" placeholder="مثال: 201000000000" required>
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">البريد الإلكتروني للتعافي والاتصال (Recovery Email) *</label>
+                            <input type="email" id="profEmail" class="form-input-admin" placeholder="مثال: info@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group-admin">
+                        <label class="form-label-admin">الوصف التعريفي (Bio)</label>
+                        <textarea id="profBio" rows="3" class="form-textarea-admin"></textarea>
+                    </div>
+
+                    <button type="button" class="btn-unlock" id="btnSaveProfile" style="width: auto; padding: 0.8rem 2rem;">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ بيانات الحساب
+                    </button>
+                </div>
+
+                <!-- Admin PIN Security & Password Change Card -->
+                <div class="admin-panel-card" style="margin-top: 1.5rem;">
+                    <div class="panel-card-head">
+                        <h3><i class="fa-solid fa-key"></i> أمان لوحة التحكم (تغيير رمز PIN)</h3>
+                    </div>
+                    <p style="color: var(--admin-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+                        يمكنك هنا تغيير رمز PIN المكون من 6 أرقام والمستخدم للدخول إلى لوحة التحكم هذه وحمايتها.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">رمز PIN الحالي (6 أرقام) *</label>
+                            <input type="password" id="pinCurrentInput" maxlength="6" class="form-input-admin" placeholder="رمز PIN الحالي (6 أرقام)...">
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">رمز PIN الجديد (6 أرقام) *</label>
+                            <input type="password" id="pinNewInput" maxlength="6" class="form-input-admin" placeholder="6 أرقام جديدة...">
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">تأكيد رمز PIN الجديد (6 أرقام) *</label>
+                            <input type="password" id="pinConfirmInput" maxlength="6" class="form-input-admin" placeholder="تأكيد 6 أرقام...">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-unlock" id="btnUpdatePin" style="width: auto; padding: 0.8rem 2rem;">
+                            <i class="fa-solid fa-shield-halved"></i> تحديث وحفظ رمز PIN الجديد
+                        </button>
+                        <span id="pinUpdateFeedback" style="font-size: 0.88rem; font-weight: 700;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 10: REVIEWS MODERATION -->
+            <div class="admin-tab-pane" id="tabReviews">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>إدارة التقييمات والآراء</h1>
+                        <p>شاهد التقييمات التي تركها العملاء واحذف أي تعليق غير حقيقي بنقرة واحدة.</p>
+                    </div>
+                </div>
+
+                <!-- Add / Edit Review Form -->
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3 id="reviewFormTitle"><i class="fa-solid fa-star"></i> + إضافة / تعديل رأي عميل</h3>
+                    </div>
+                    <form id="addReviewForm">
+                        <input type="hidden" id="editReviewId" value="">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">اسم العميل *</label>
+                                <input type="text" id="revClientName" class="form-input-admin" placeholder="مثال: يوسف العتيبي" required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">التقييم بالنجوم *</label>
+                                <select id="revStars" class="form-select-admin">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5 نجوم - ممتاز)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4 نجوم - جيد جداً)</option>
+                                    <option value="3">⭐⭐⭐ (3 نجوم)</option>
+                                    <option value="2">⭐⭐ (نجمتان)</option>
+                                    <option value="1">⭐ (نجمة واحدة)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">نص التقييم ورأي العميل *</label>
+                            <textarea id="revComment" rows="3" class="form-textarea-admin" placeholder="اكتب شهادة أو رأي العميل هنا..." required></textarea>
+                        </div>
+                        <div style="display:flex; gap:0.75rem; align-items:center;">
+                            <button type="submit" id="btnSubmitReview" class="btn-unlock" style="width: auto; padding: 0.8rem 2rem;">
+                                <i class="fa-solid fa-plus"></i> إضافة التقييم فوراً
+                            </button>
+                            <button type="button" id="btnCancelEditRev" class="btn-cancel-edit" style="display:none; padding:0.8rem 1.5rem;">
+                                <i class="fa-solid fa-xmark"></i> إلغاء التعديل
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3>قائمة التقييمات المنشورة</h3>
+                    </div>
+                    <div id="reviewsAdminList"></div>
+                </div>
+            </div>
+
+            <!-- TAB: SECTIONS VISIBILITY STUDIO (1-CLICK TOGGLES & EYE ICONS) -->
+            <div class="admin-tab-pane" id="tabSectionsVisibility">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1 style="color: #38bdf8;"><i class="fa-solid fa-eye"></i> إدارة ظهور أقسام الموقع والقوائم</h1>
+                        <p>تحكم في إظهار أو إخفاء أي قسم في موقعك بنقرة زر واحدة (أيقونة العين 👁️). عندما تخفي أي قسم، يختفي تلقائياً من الصفحة الرئيسية ومن القائمة العلوية.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card" style="margin-bottom: 1.5rem;">
+                    <div class="panel-card-head">
+                        <h3><i class="fa-solid fa-toggle-on"></i> حالة أقسام الموقع الحالية</h3>
+                        <span style="font-size:0.82rem; color:var(--admin-muted);">التعديلات تُطبق فورياً على الموقع والقوائم</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
+                        
+                        <!-- 1. Store Toggle Card -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(0,113,227,0.15); color:var(--admin-blue); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-store"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">متجر القوالب والملحقات</strong>
+                                    </div>
+                                    <span id="badgeSecStore" class="badge-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">ظاهر 🟢</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    يعرض متجر بيع القوالب في الصفحة الرئيسية، ورابط المتجر في القائمة العلوية وصفحة store.html المستقلة.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-section-toggle btn-toggle-section is-visible" data-sec="store">
+                                <i class="fa-solid fa-eye-slash"></i> إخفاء متجر القوالب
+                            </button>
+                        </div>
+
+                        <!-- 2. Tutorials Toggle Card -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(139,92,246,0.15); color:#a78bfa; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-graduation-cap"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">الدروس ومقالات المونتاج</strong>
+                                    </div>
+                                    <span id="badgeSecTutorials" class="badge-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">ظاهر 🟢</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    يعرض قسم المقالات التعليمية في الصفحة الرئيسية، ورابط المقالات في القائمة وصفحة tutorials.html.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-section-toggle btn-toggle-section is-visible" data-sec="tutorials">
+                                <i class="fa-solid fa-eye-slash"></i> إخفاء قسم المقالات
+                            </button>
+                        </div>
+
+                        <!-- 3. Calculator Toggle Card -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(245,158,11,0.15); color:#fbbf24; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-calculator"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">حاسبة الأسعار التفاعلية</strong>
+                                    </div>
+                                    <span id="badgeSecCalculator" class="badge-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">ظاهر 🟢</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    حاسبة تفاعلية تمكّن العميل من اختيار نوع الفيديو والدقائق وحساب التكلفة مع خصم الباقات وطلب واتساب.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-section-toggle btn-toggle-section is-visible" data-sec="calculator">
+                                <i class="fa-solid fa-eye-slash"></i> إخفاء حاسبة الأسعار
+                            </button>
+                        </div>
+
+                        <!-- 4. Reviews Toggle Card -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(236,72,153,0.15); color:#f472b6; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-comments"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">آراء وتقييمات العملاء</strong>
+                                    </div>
+                                    <span id="badgeSecReviews" class="badge-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">ظاهر 🟢</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    يعرض شهادات العملاء والتقييمات بالنجوم في الصفحة الرئيسية ورابطها في القائمة المنسدلة.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-section-toggle btn-toggle-section is-visible" data-sec="reviews">
+                                <i class="fa-solid fa-eye-slash"></i> إخفاء قسم التقييمات
+                            </button>
+                        </div>
+
+                        <!-- 5. FAQ Toggle Card -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(14,165,233,0.15); color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-circle-question"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">الأسئلة الشائعة (FAQ)</strong>
+                                    </div>
+                                    <span id="badgeSecFaq" class="badge-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">ظاهر 🟢</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    يعرض قائمة الأسئلة الشائعة والأكورديون التفاعلي في أسفل الصفحة الرئيسية لتبديد تردد العملاء.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-section-toggle btn-toggle-section is-visible" data-sec="faq">
+                                <i class="fa-solid fa-eye-slash"></i> إخفاء قسم الأسئلة
+                            </button>
+                        </div>
+
+                        <!-- 6. Portfolio Showcase (Core Mandatory) -->
+                        <div class="visibility-card" style="background: rgba(255,255,255,0.015); border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; opacity:0.85;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.08); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                            <i class="fa-solid fa-film"></i>
+                                        </div>
+                                        <strong style="color:#fff; font-size:1.05rem;">معرض الأعمال وبطاقة الهوية</strong>
+                                    </div>
+                                    <span class="badge-tag" style="background:rgba(255,255,255,0.08); color:#aaa; border:1px solid var(--admin-border); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:800; font-size:0.78rem;">إجباري دائم 🔒</span>
+                                </div>
+                                <p style="color:var(--admin-muted); font-size:0.85rem; line-height:1.5; margin-bottom:1rem;">
+                                    القسم الجوهري لموقعك الذي يحتوي على بطاقتك الشخصية ومعرض أعمال الريلز والفيديوهات؛ يظل ظاهراً دائماً.
+                                </p>
+                            </div>
+                            <button type="button" disabled style="width:100%; padding:0.7rem; font-size:0.85rem; background:rgba(255,255,255,0.05); color:#6b7280; border:1px solid var(--admin-border); border-radius:10px; cursor:not-allowed; font-weight:700;">
+                                <i class="fa-solid fa-lock"></i> مثبت ولا يمكن إخفاؤه
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LICENSE ACTIVATION & DOMAIN BINDING -->
+            <div class="admin-tab-pane" id="tabActivation">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1><i class="fa-solid fa-certificate" style="color:var(--admin-emerald);"></i> تفعيل ترخيص الموقع وحماية الملكية</h1>
+                        <p>اربط موقعك برمز الترخيص الرسمي المعتمد من المطور ليعمل بثبات على الدومين الخاص بك دون أي قيود.</p>
+                    </div>
+                </div>
+
+                <div class="admin-panel-card">
+                    <div class="panel-card-head">
+                        <h3><i class="fa-solid fa-shield-halved"></i> حالة الترخيص الحالية للدومين</h3>
+                        <span id="activationStatusBadge" style="padding:0.4rem 1rem; border-radius:9999px; font-weight:800; font-size:0.85rem; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid var(--admin-emerald);">
+                            جاري الفحص...
+                        </span>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border:1px solid var(--admin-border); border-radius:14px; padding:1.25rem; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; font-size:0.95rem;">
+                            <div>
+                                <span style="color:var(--admin-muted);">الدومين النشط المكتشف:</span>
+                                <strong id="detectedDomainDisplay" style="color:#fff; margin-inline-start:0.5rem; font-size:1.05rem;">localhost</strong>
+                            </div>
+                            <div>
+                                <span style="color:var(--admin-muted);">حقوق المطور في الفوتر:</span>
+                                <strong id="footerRightsStatusDisplay" style="color:var(--admin-blue); margin-inline-start:0.5rem;">محمية 🔒</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="activationForm">
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">البريد الإلكتروني المسجل عند الشراء *</label>
+                                <input type="email" id="licClientEmail" class="form-input-admin" placeholder="بريدك الإلكتروني المسجل..." required>
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">كود الترخيص المشفر (License Key) المستلم من صلاح *</label>
+                                <input type="text" id="licTokenInput" class="form-input-admin" placeholder="مثال: PRO-yourname.github.io-F0-9B8A7C6D5E" style="font-family:monospace; font-size:1rem; letter-spacing:1px;" required>
+                            </div>
+                        </div>
+
+                        <div id="activationFeedback" style="display:none; padding:0.75rem 1rem; border-radius:10px; font-size:0.88rem; font-weight:700; margin-bottom:1.25rem;"></div>
+
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+                            <button type="submit" class="btn-unlock" id="btnActivateLicense" style="width: auto; padding: 0.9rem 2.2rem;">
+                                <i class="fa-solid fa-circle-check"></i> تفعيل الترخيص وفتح الموقع فوراً
+                            </button>
+                            <a id="btnContactForLicense" href="https://wa.me/201000000000" target="_blank" class="btn-cancel-edit" style="display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; padding:0.9rem 1.75rem; color:#25D366; border-color:rgba(37,211,102,0.4);">
+                                <i class="fa-brands fa-whatsapp"></i> طلب أو استلام كود التفعيل عبر واتساب
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 10: GITHUB PAGES DEPLOY & CODE EXPORT -->
+            <div class="admin-tab-pane" id="tabDeploy">
+                <div class="admin-top-bar">
+                    <div class="admin-page-title">
+                        <h1>نشر الموقع وتصدير الكود لـ GitHub Pages 🚀</h1>
+                        <p>احفظ تعديلاتك بشكل دائم لتظهر لجميع زوار العالم على GitHub Pages، أو صدّر كود الموقع المحدث بنقرة واحدة.</p>
+                    </div>
+                </div>
+
+                <div class="admin-grid-layout">
+                    <!-- Method 1: Instant Direct File System Save / Download config.js -->
+                    <div class="admin-panel-card">
+                        <div class="panel-card-head">
+                            <h3><i class="fa-solid fa-file-code"></i> الطريقة الأولى: تصدير وحفظ كود الموقع (config.js)</h3>
+                            <span class="id-badge" style="background: rgba(16, 185, 129, 0.15); color: var(--admin-emerald);"><i class="fa-solid fa-bolt"></i> سهلة وفورية لأي مبتدئ</span>
+                        </div>
+                        <p style="color: var(--admin-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.25rem;">
+                            يقوم هذا الزر بتوليد ملف <code>config.js</code> محدث بالكامل يحتوي على بياناتك الشخصية الحالية، وروابطك، وأسعارك، وأعمالك الحقيقية فقط (مع مسح كافة الأعمال والفيديوهات التي قمت بحذفها نهائياً من الكود).
+                        </p>
+
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button type="button" class="btn-unlock" id="btnDownloadConfigJs" style="width: auto; padding: 0.9rem 2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="fa-solid fa-cloud-arrow-down"></i> تحميل ملف config.js المحدث
+                            </button>
+                            <button type="button" class="btn-unlock" id="btnDirectFileSave" style="width: auto; padding: 0.9rem 2rem; background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);">
+                                <i class="fa-solid fa-floppy-disk"></i> حفظ مباشر في مجلد المشروع (Chrome/Edge)
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border: 1px dashed var(--admin-border); border-radius: 12px; font-size: 0.88rem; color: var(--admin-secondary);">
+                            <h4 style="margin: 0 0 0.5rem 0; color: var(--admin-text);"><i class="fa-solid fa-circle-info"></i> خطوات تطبيق الملف على GitHub Pages:</h4>
+                            <ol style="margin: 0; padding-right: 1.2rem; line-height: 1.8;">
+                                <li>حمّل ملف <code>config.js</code> عبر الزر أعلاه.</li>
+                                <li>انقل الملف إلى مجلد <code>js/</code> داخل مجلد المشروع ووافق على الاستبدال (Replace).</li>
+                                <li>ارفع الملفات على مستودع GitHub الخاص بك (<code>git add .</code> ثم <code>git commit</code> ثم <code>git push</code>).</li>
+                                <li>الآن سيظهر موقعك بكافة تعديلاتك الحقيقية لكل من يفتح الرابط من أي جهاز أو متصفح في العالم!</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Method 2: Direct GitHub REST API Automated Deployment -->
+                    <div class="admin-panel-card">
+                        <div class="panel-card-head">
+                            <h3><i class="fa-brands fa-github"></i> الطريقة الثانية: النشر التلقائي المباشر عبر GitHub API</h3>
+                            <span class="id-badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;"><i class="fa-solid fa-wand-magic-sparkles"></i> بدون أوامر ولا لمس الكود</span>
+                        </div>
+                        <p style="color: var(--admin-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.25rem;">
+                            اربط لوحة التحكم بمستودع GitHub الخاص بك؛ ليتم تحديث كود الموقع على GitHub Pages تلقائياً في 5 ثوانٍ بنقرة زر واحدة من داخل لوحة التحكم، سواء من اللابتوب أو الهاتف!
+                        </p>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">اسم المستخدم على GitHub (Username / Org) *</label>
+                                <input type="text" id="ghUsername" class="form-input-admin" placeholder="مثال: your-username">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">اسم المستودع (Repository Name) *</label>
+                                <input type="text" id="ghRepoName" class="form-input-admin" placeholder="مثال: my-portfolio أو your-username.github.io">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">الفرع (Branch) *</label>
+                                <input type="text" id="ghBranch" class="form-input-admin" value="main" placeholder="main أو master">
+                            </div>
+                            <div class="form-group-admin">
+                                <label class="form-label-admin">رمز وصول GitHub (Personal Access Token - PAT) *</label>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <input type="password" id="ghToken" class="form-input-admin" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <button type="button" class="btn-icon-admin" id="btnToggleGhToken" title="إظهار / إخفاء الرمز"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                                <span style="font-size:0.75rem; color:var(--admin-muted); display:block; margin-top:0.3rem;">
+                                    يمكنك إنشاء الرمز مجاناً من حسابك: GitHub > Settings > Developer Settings > Personal Access Tokens (صلاحية repo).
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <button type="button" class="btn-unlock" id="btnPublishToGitHub" style="width: auto; padding: 0.95rem 2.2rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                                <i class="fa-solid fa-rocket"></i> 🚀 نشر التحديثات فورياً على GitHub Pages
+                            </button>
+                            <button type="button" class="btn-secondary-admin" id="btnSaveGhSettings" style="padding: 0.95rem 1.5rem;">
+                                <i class="fa-solid fa-bookmark"></i> حفظ بيانات GitHub في لوحة التحكم
+                            </button>
+                        </div>
+
+                        <div id="ghPublishFeedback" style="display:none; margin-top: 1.25rem; padding: 1rem; border-radius: 10px; font-weight: 700;"></div>
+                    </div>
+
+                    <!-- Method 3: One-Click Projects Cleaner -->
+                    <div class="admin-panel-card">
+                        <div class="panel-card-head">
+                            <h3><i class="fa-solid fa-broom"></i> تنظيف وتفريغ معرض الأعمال للبدء من الصفر</h3>
+                        </div>
+                        <p style="color: var(--admin-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1rem;">
+                            إذا كنت تجهز القالب للبيع أو تريد البدء بقائمة أعمال فارغة تماماً لوضع أعمالك الحقيقية فقط، يمكنك تفريغ كافة المشاريع الافتراضية بنقرة واحدة.
+                        </p>
+                        <button type="button" class="btn-unlock" id="btnWipeAllProjects" style="width: auto; padding: 0.75rem 1.6rem; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--admin-crimson); color: #ef4444;">
+                            <i class="fa-solid fa-trash-can"></i> تفريغ كافة المشاريع الافتراضية الآن
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Circular Image Cropper Modal (HTML5 Canvas Engine) -->
+    <div class="cropper-modal" id="imageCropperModal" style="display: none;">
+        <div class="cropper-backdrop" id="cropperBackdrop"></div>
+        <div class="cropper-dialog-box">
+            <div class="cropper-dialog-head">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 113, 227, 0.15); color: var(--admin-blue); display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-crop-simple"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--admin-text);" id="cropperModalTitle">أداة الاقتصاص الدائري الاحترافية</h3>
+                        <p style="margin: 0; font-size: 0.78rem; color: var(--admin-muted);" id="cropperModalSubtitle">اسحب وحرّك الصورة وكبّر أو صغّر لتحديد الإطار الدائري المثالي</p>
+                    </div>
+                </div>
+                <button type="button" class="cropper-close-btn" id="btnCropperClose" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="cropper-stage-wrapper">
+                <div class="cropper-canvas-container" id="cropperCanvasContainer">
+                    <canvas id="cropperCanvas" width="340" height="340"></canvas>
+                    <div class="cropper-circular-mask-overlay">
+                        <div class="cropper-cutout-ring"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Zoom & Pan Guide) -->
+            <div class="cropper-controls-bar">
+                <div class="cropper-zoom-row">
+                    <button type="button" class="btn-cropper-tool" id="btnCropperZoomOut" title="تصغير"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                    <input type="range" id="cropperZoomSlider" min="0.5" max="3" step="0.01" value="1" style="flex: 1; accent-color: var(--admin-blue); cursor: pointer;">
+                    <button type="button" class="btn-cropper-tool" id="btnCropperZoomIn" title="تكبير"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button type="button" class="btn-cropper-tool" id="btnCropperReset" title="إعادة ضبط"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--admin-muted); margin-top: 0.4rem;">
+                    <span><i class="fa-regular fa-hand"></i> اسحب بالماوس أو اللمس لتحريك الصورة داخل الدائرة</span>
+                    <span id="cropperZoomVal" style="font-family: monospace; font-weight: 700;">100%</span>
+                </div>
+            </div>
+
+            <div class="cropper-dialog-footer">
+                <button type="button" class="btn-secondary-admin" id="btnCropperCancel" style="padding: 0.75rem 1.4rem; background: rgba(255,255,255,0.06); border: 1px solid var(--admin-border); color: var(--admin-text); border-radius: 10px; cursor: pointer; font-weight: 700;">
+                    إلغاء
+                </button>
+                <button type="button" class="btn-unlock" id="btnCropperApply" style="padding: 0.75rem 1.8rem; background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);">
+                    <i class="fa-solid fa-circle-check"></i> تطبيق وقص الصورة دائرية ✂️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
