@@ -35,8 +35,8 @@ const DEFAULT_CONFIG = {
         roleEn: "High-Retention Video Editor & Motion Designer",
         bioAr: "صناعة محتوى سينمائي عالي الجودة ومونتاج احترافي مخصص لصناع المحتوى والبراندات لتحويل المشاهدات إلى تفاعل حقيقي.",
         bioEn: "Crafting high-retention cinematic edits and kinetic visuals that captivate audiences and scale engagement.",
-        whatsapp: "201000000000",
-        email: "info@example.com",
+        whatsapp: "201028076694",
+        email: "Salahsalehbesoo@gmail.com",
         expYears: 3,
         workStatus: "online", // "online" | "busy" | "offline"
         availabilityText: "متاح الآن لمشاريع جديدة",
@@ -133,14 +133,15 @@ const DEFAULT_CONFIG = {
         enabled: true
     },
     security: {
-        adminEmail: "admin@example.com",
+        adminEmail: "Salahsalehbesoo@gmail.com",
+        adminUsername: "admin",
         pinCode: "123456",
-        recoveryPhone: "201000000000",
+        recoveryPhone: "201028076694",
         masterKey: "SALAH-MASTER-2026",
-        authorizedDomains: ["localhost", "127.0.0.1"],
-        licenseKey: "",
-        clientEmail: "",
-        allowFooterRemoval: false
+        authorizedDomains: ["localhost", "127.0.0.1", "salahsalehbesoo.github.io"],
+        licenseKey: "PRO-salahsalehbesoo.github.io-F1-7E01F36253C6",
+        clientEmail: "Salahsalehbesoo@gmail.com",
+        allowFooterRemoval: true
     }
 };
 
@@ -379,8 +380,8 @@ function getSiteConfig() {
             let parsed = JSON.parse(stored);
             // Auto-clean legacy hardcoded prostudio & old test data
             if (parsed && parsed.profile) {
-                if (parsed.profile.whatsapp === '201096419945') parsed.profile.whatsapp = DEFAULT_CONFIG.profile.whatsapp;
-                if (parsed.profile.email === 'contact@prostudio.com') parsed.profile.email = DEFAULT_CONFIG.profile.email;
+                if (parsed.profile.whatsapp === '201096419945' || parsed.profile.whatsapp === '201000000000') parsed.profile.whatsapp = DEFAULT_CONFIG.profile.whatsapp;
+                if (parsed.profile.email === 'contact@prostudio.com' || parsed.profile.email === 'info@example.com') parsed.profile.email = DEFAULT_CONFIG.profile.email;
                 if (parsed.profile.logoText === 'PRO' && parsed.profile.logoBadge === 'STUDIO') {
                     parsed.profile.logoText = DEFAULT_CONFIG.profile.logoText;
                     parsed.profile.logoBadge = DEFAULT_CONFIG.profile.logoBadge;
@@ -393,8 +394,20 @@ function getSiteConfig() {
                 }
             }
             if (parsed && parsed.security) {
-                if (parsed.security.adminEmail === 'admin@prostudio.com') parsed.security.adminEmail = DEFAULT_CONFIG.security.adminEmail;
-                if (parsed.security.recoveryPhone === '201096419945') parsed.security.recoveryPhone = DEFAULT_CONFIG.security.recoveryPhone;
+                if (parsed.security.adminEmail === 'admin@prostudio.com' || parsed.security.adminEmail === 'admin@example.com') parsed.security.adminEmail = DEFAULT_CONFIG.security.adminEmail;
+                if (parsed.security.recoveryPhone === '201096419945' || parsed.security.recoveryPhone === '201000000000') parsed.security.recoveryPhone = DEFAULT_CONFIG.security.recoveryPhone;
+                if (!parsed.security.licenseKey && DEFAULT_CONFIG.security.licenseKey) {
+                    parsed.security.licenseKey = DEFAULT_CONFIG.security.licenseKey;
+                }
+                if (DEFAULT_CONFIG.security.authorizedDomains) {
+                    if (!parsed.security.authorizedDomains) parsed.security.authorizedDomains = [];
+                    DEFAULT_CONFIG.security.authorizedDomains.forEach(d => {
+                        if (!parsed.security.authorizedDomains.includes(d)) parsed.security.authorizedDomains.push(d);
+                    });
+                }
+                if (DEFAULT_CONFIG.security.allowFooterRemoval) {
+                    parsed.security.allowFooterRemoval = true;
+                }
             }
             return deepMerge(DEFAULT_CONFIG, parsed);
         }
@@ -850,7 +863,7 @@ function renderActivationLockScreen(currentHost) {
                 تم حماية هذا الموقع بنظام <strong>Creative Anti-Theft Guard</strong>. لتشغيل الموقع على هذا الدومين يلزم إدخال كود الترخيص الرسمي المعتمد من المطور (صلاح).
             </p>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="https://wa.me/201000000000?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.9rem 1.5rem; border-radius: 9999px; font-weight: 800; text-decoration: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
+                <a href="https://wa.me/201028076694?text=${encodeURIComponent('مرحباً، أود تفعيل ترخيص رسمي للقالب على الدومين: ' + currentHost)}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.9rem 1.5rem; border-radius: 9999px; font-weight: 800; text-decoration: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
                     <i class="fa-brands fa-whatsapp"></i> طلب تفعيل وترخيص الموقع عبر واتساب
                 </a>
                 <a href="admin.html" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 0.8rem 1.5rem; border-radius: 9999px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
@@ -870,6 +883,11 @@ function renderActivationLockScreen(currentHost) {
 function verifyLicense() {
     const config = getSiteConfig();
     const currentHost = window.location.hostname;
+
+    // 0. Exclude admin.html and developer.html from locking so the owner can always access settings & activate key
+    if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('developer.html')) {
+        return { status: 'admin_bypass', allowFooter: true };
+    }
 
     // 1. Localhost and local files always allowed (Developer Preview)
     if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') {
