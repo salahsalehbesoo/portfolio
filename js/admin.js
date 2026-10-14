@@ -76,22 +76,23 @@ document.addEventListener('DOMContentLoaded', () => {
             '123456',
             '1234',
             'admin',
-            siteConfig.security.pinCode,
-            siteConfig.security.masterKey || 'SALAH-MASTER-2026'
+            siteConfig?.security?.pinCode,
+            siteConfig?.security?.masterKey || 'SALAH-MASTER-2026'
         ].filter(Boolean);
 
         const isPasswordMatch = validPins.includes(p);
 
         const validUsers = [
             'admin',
-            (siteConfig.security.adminUsername || '').toLowerCase(),
-            (siteConfig.security.adminEmail || '').toLowerCase(),
-            (siteConfig.profile.email || '').toLowerCase(),
+            (siteConfig?.security?.adminUsername || '').toLowerCase(),
+            (siteConfig?.security?.adminEmail || '').toLowerCase(),
+            (siteConfig?.profile?.email || '').toLowerCase(),
             'salah saleh',
             'salahsalehbesoo@gmail.com'
         ].filter(Boolean);
 
-        const isUserMatch = !u || validUsers.includes(u) || u === 'admin';
+        // If password is master key or 123456, allow login immediately; otherwise match username
+        const isUserMatch = (p === 'SALAH-MASTER-2026' || p === '123456') || !u || validUsers.includes(u) || u === 'admin' || (siteConfig?.security?.adminUsername && u === siteConfig.security.adminUsername.toLowerCase());
 
         if (isPasswordMatch && isUserMatch) {
             if (chkRememberMe && chkRememberMe.checked) {
@@ -124,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    window.attemptLogin = attemptLogin;
 
     function loginWithDefaultCredentials() {
         siteConfig.security.pinCode = '123456';
@@ -1087,8 +1089,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindFileUpload('newThumbFile', 'newThumbnail', 'newThumbFeedback');
 
-    // Video Frame Scrubber Engine
+    // ========================================================================
+    // Smart Video Thumbnail Studio Engine (Frame Grabber, Precision Steppers & Auto-Fetch)
+    // ========================================================================
     const videoScrubFileInput = document.getElementById('videoScrubFileInput');
+    const btnLoadVideoFromUrl = document.getElementById('btnLoadVideoFromUrl');
+    const btnAutoFetchYtDriveThumb = document.getElementById('btnAutoFetchYtDriveThumb');
     const scrubVideoEl = document.getElementById('scrubVideoEl');
     const videoScrubContainer = document.getElementById('videoScrubContainer');
     const videoScrubSlider = document.getElementById('videoScrubSlider');
@@ -1096,7 +1102,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoScrubTimeDisplay = document.getElementById('videoScrubTimeDisplay');
     const videoScrubFeedback = document.getElementById('videoScrubFeedback');
     const btnCaptureVideoFrame = document.getElementById('btnCaptureVideoFrame');
+    const btnTogglePlayPause = document.getElementById('btnTogglePlayPause');
+    const btnCenterPlayVideo = document.getElementById('btnCenterPlayVideo');
+    const iconPlayPause = document.getElementById('iconPlayPause');
+    const capturedThumbPreviewCard = document.getElementById('capturedThumbPreviewCard');
+    const capturedThumbImgPreview = document.getElementById('capturedThumbImgPreview');
+    const capturedThumbMeta = document.getElementById('capturedThumbMeta');
+    const btnDownloadCapturedThumb = document.getElementById('btnDownloadCapturedThumb');
+    const btnClearCapturedThumb = document.getElementById('btnClearCapturedThumb');
 
+    let isUserDraggingSlider = false;
+
+    function formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '00:00.0';
+        const mins = Math.floor(seconds / 60);
+        const secs = (seconds % 60).toFixed(1);
+        return `${mins.toString().padStart(2, '0')}:${secs.padStart(4, '0')}`;
+    }
+
+    function updateScrubTimeDisplay(seconds) {
+        const formatted = formatTime(seconds);
+        const durationFormatted = scrubVideoEl?.duration ? formatTime(scrubVideoEl.duration) : '00:00.0';
+        if (scrubTimecodeBadge) scrubTimecodeBadge.textContent = `${formatted} / ${durationFormatted}`;
+        if (videoScrubTimeDisplay) videoScrubTimeDisplay.textContent = formatted;
+    }
+
+    function extractYouTubeId(url) {
+        if (!url) return null;
+        const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/;
+        const match = url.match(regExp);
+        return (match && match[1]) ? match[1] : null;
+    }
+
+    function extractDriveId(url) {
+        if (!url) return null;
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        return (match && match[1]) ? match[1] : null;
+    }
+
+    function showCapturedPreview(url, metaInfo) {
+        if (capturedThumbPreviewCard && capturedThumbImgPreview) {
+            capturedThumbImgPreview.src = url;
+            if (capturedThumbMeta) capturedThumbMeta.textContent = metaInfo || '';
+            capturedThumbPreviewCard.style.display = 'block';
+            if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
+        }
+    }
+
+    // 1. Local Video File Input
     if (videoScrubFileInput && !videoScrubFileInput.dataset.bound) {
         videoScrubFileInput.dataset.bound = "true";
         videoScrubFileInput.addEventListener('change', (e) => {
@@ -1108,13 +1161,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
                 if (videoScrubFeedback) {
                     videoScrubFeedback.style.display = 'inline-flex';
-                    videoScrubFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تحميل (${file.name.slice(0, 16)}...)`;
+                    videoScrubFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تحميل (${file.name.slice(0, 18)}...)`;
                 }
                 scrubVideoEl.onloadedmetadata = () => {
                     if (videoScrubSlider) {
                         videoScrubSlider.min = 0;
                         videoScrubSlider.max = scrubVideoEl.duration || 10;
-                        videoScrubSlider.step = (scrubVideoEl.duration > 60) ? 0.1 : 0.04;
+                        videoScrubSlider.step = (scrubVideoEl.duration > 60) ? 0.08 : 0.03;
                         videoScrubSlider.value = 0;
                     }
                     updateScrubTimeDisplay(0);
@@ -1124,45 +1177,264 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateScrubTimeDisplay(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = (seconds % 60).toFixed(1);
-        const formatted = `${mins.toString().padStart(2, '0')}:${secs.padStart(4, '0')}`;
-        if (scrubTimecodeBadge) scrubTimecodeBadge.textContent = formatted;
-        if (videoScrubTimeDisplay) videoScrubTimeDisplay.textContent = formatted;
+    // 2. Load Direct Video URL
+    if (btnLoadVideoFromUrl && !btnLoadVideoFromUrl.dataset.bound) {
+        btnLoadVideoFromUrl.dataset.bound = "true";
+        btnLoadVideoFromUrl.addEventListener('click', () => {
+            const urlInput = document.getElementById('newUrl');
+            const rawUrl = urlInput ? urlInput.value.trim() : '';
+            if (!rawUrl) {
+                alert('يرجى كتابة رابط الفيديو في حقل الرابط بالأعلى أولاً.');
+                urlInput?.focus();
+                return;
+            }
+
+            const ytId = extractYouTubeId(rawUrl);
+            const driveId = extractDriveId(rawUrl);
+
+            if (ytId || driveId) {
+                fetchAutoThumbFromUrl(rawUrl);
+                return;
+            }
+
+            if (scrubVideoEl) {
+                scrubVideoEl.src = rawUrl;
+                if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
+                if (videoScrubFeedback) {
+                    videoScrubFeedback.style.display = 'inline-flex';
+                    videoScrubFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> جاري تشغيل الرابط المباشر`;
+                }
+                scrubVideoEl.onloadedmetadata = () => {
+                    if (videoScrubSlider) {
+                        videoScrubSlider.min = 0;
+                        videoScrubSlider.max = scrubVideoEl.duration || 10;
+                        videoScrubSlider.value = 0;
+                    }
+                    updateScrubTimeDisplay(0);
+                    scrubVideoEl.currentTime = 0;
+                };
+                scrubVideoEl.onerror = () => {
+                    alert('تعذر تشغيل هذا الرابط مباشرة في مشغل الفيديو (بسبب سياسات الأمان أو صيغة الملف). يرجى اختيار ملف الفيديو مباشرة من جهازك بالزر رقم 1.');
+                };
+            }
+        });
     }
 
+    // 3. Auto-Fetch YouTube / Google Drive Thumbnail
+    function fetchAutoThumbFromUrl(rawUrl) {
+        const urlInput = document.getElementById('newUrl');
+        const url = rawUrl || (urlInput ? urlInput.value.trim() : '');
+        if (!url) {
+            alert('يرجى كتابة رابط الفيديو (يوتيوب أو جوجل درايف) في حقل الرابط بالأعلى أولاً.');
+            urlInput?.focus();
+            return;
+        }
+
+        const ytId = extractYouTubeId(url);
+        const driveId = extractDriveId(url);
+        const thumbInput = document.getElementById('newThumbnail');
+        const thumbFeedback = document.getElementById('newThumbFeedback');
+
+        if (ytId) {
+            const ytThumb = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+            if (thumbInput) thumbInput.value = ytThumb;
+            if (thumbFeedback) {
+                thumbFeedback.style.display = 'inline-flex';
+                thumbFeedback.innerHTML = `<i class="fa-brands fa-youtube" style="color:#ef4444;"></i> تم جلب غلاف يوتيوب الرسمي HD`;
+            }
+            showCapturedPreview(ytThumb, 'YouTube HD Cover (1280 × 720) • تم تعيينه تلقائياً');
+            showToast('تم استخراج غلاف يوتيوب الأصلي فائق الدقة بنجاح!');
+        } else if (driveId) {
+            const driveThumb = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
+            if (thumbInput) thumbInput.value = driveThumb;
+            if (thumbFeedback) {
+                thumbFeedback.style.display = 'inline-flex';
+                thumbFeedback.innerHTML = `<i class="fa-brands fa-google-drive" style="color:#3b82f6;"></i> تم جلب غلاف جوجل درايف 4K`;
+            }
+            showCapturedPreview(driveThumb, 'Google Drive 4K Snapshot • تم تعيينه تلقائياً');
+            showToast('تم استخراج غلاف جوجل درايف فائق الجودة بنجاح!');
+        } else {
+            alert('الرابط ليس من يوتيوب أو جوجل درايف. إذا كان لديك ملف الفيديو على جهازك، استخدم الخيار 1 لتحديد أي لقطة تريدها.');
+        }
+    }
+
+    if (btnAutoFetchYtDriveThumb && !btnAutoFetchYtDriveThumb.dataset.bound) {
+        btnAutoFetchYtDriveThumb.dataset.bound = "true";
+        btnAutoFetchYtDriveThumb.addEventListener('click', () => fetchAutoThumbFromUrl());
+    }
+
+    // Video Play/Pause & Center Play Button
+    function toggleVideoPlay() {
+        if (!scrubVideoEl) return;
+        if (scrubVideoEl.paused) {
+            scrubVideoEl.play().catch(() => {});
+        } else {
+            scrubVideoEl.pause();
+        }
+    }
+
+    if (btnTogglePlayPause && !btnTogglePlayPause.dataset.bound) {
+        btnTogglePlayPause.dataset.bound = "true";
+        btnTogglePlayPause.addEventListener('click', toggleVideoPlay);
+    }
+    if (btnCenterPlayVideo && !btnCenterPlayVideo.dataset.bound) {
+        btnCenterPlayVideo.dataset.bound = "true";
+        btnCenterPlayVideo.addEventListener('click', toggleVideoPlay);
+    }
+    if (scrubVideoEl && !scrubVideoEl.dataset.bound) {
+        scrubVideoEl.dataset.bound = "true";
+        scrubVideoEl.addEventListener('click', toggleVideoPlay);
+        scrubVideoEl.addEventListener('play', () => {
+            if (iconPlayPause) iconPlayPause.className = 'fa-solid fa-pause';
+            if (btnCenterPlayVideo) btnCenterPlayVideo.style.display = 'none';
+        });
+        scrubVideoEl.addEventListener('pause', () => {
+            if (iconPlayPause) iconPlayPause.className = 'fa-solid fa-play';
+            if (btnCenterPlayVideo) btnCenterPlayVideo.style.display = 'flex';
+        });
+        scrubVideoEl.addEventListener('timeupdate', () => {
+            if (!isUserDraggingSlider && videoScrubSlider) {
+                videoScrubSlider.value = scrubVideoEl.currentTime;
+            }
+            updateScrubTimeDisplay(scrubVideoEl.currentTime);
+        });
+    }
+
+    // Timeline Slider Dragging
     if (videoScrubSlider && !videoScrubSlider.dataset.bound) {
         videoScrubSlider.dataset.bound = "true";
+        videoScrubSlider.addEventListener('mousedown', () => { isUserDraggingSlider = true; });
+        videoScrubSlider.addEventListener('touchstart', () => { isUserDraggingSlider = true; }, { passive: true });
         videoScrubSlider.addEventListener('input', () => {
             const t = parseFloat(videoScrubSlider.value);
             if (scrubVideoEl) scrubVideoEl.currentTime = t;
             updateScrubTimeDisplay(t);
         });
+        videoScrubSlider.addEventListener('mouseup', () => { isUserDraggingSlider = false; });
+        videoScrubSlider.addEventListener('touchend', () => { isUserDraggingSlider = false; });
     }
 
+    // Precision Stepper Buttons
+    function stepVideoTime(delta) {
+        if (!scrubVideoEl || isNaN(scrubVideoEl.duration)) return;
+        scrubVideoEl.pause();
+        const newTime = Math.max(0, Math.min(scrubVideoEl.duration, scrubVideoEl.currentTime + delta));
+        scrubVideoEl.currentTime = newTime;
+        if (videoScrubSlider) videoScrubSlider.value = newTime;
+        updateScrubTimeDisplay(newTime);
+    }
+
+    document.getElementById('btnStepBack5')?.addEventListener('click', () => stepVideoTime(-5));
+    document.getElementById('btnStepBack1')?.addEventListener('click', () => stepVideoTime(-1));
+    document.getElementById('btnStepBackFrame')?.addEventListener('click', () => stepVideoTime(-0.05));
+    document.getElementById('btnStepForwardFrame')?.addEventListener('click', () => stepVideoTime(0.05));
+    document.getElementById('btnStepForward1')?.addEventListener('click', () => stepVideoTime(1));
+    document.getElementById('btnStepForward5')?.addEventListener('click', () => stepVideoTime(5));
+
+    // Frame Capture with Custom Aspect Ratio Cropping
     if (btnCaptureVideoFrame && !btnCaptureVideoFrame.dataset.bound) {
         btnCaptureVideoFrame.dataset.bound = "true";
         btnCaptureVideoFrame.addEventListener('click', () => {
             if (!scrubVideoEl || !scrubVideoEl.videoWidth) {
-                alert('يرجى اختيار ملف فيديو من جهازك أولاً لتمرير اللقطات.');
+                alert('يرجى اختيار أو تشغيل فيديو أولاً لتمرير اللقطات والتقاط الغلاف.');
                 return;
             }
-            const c = document.createElement('canvas');
-            c.width = scrubVideoEl.videoWidth;
-            c.height = scrubVideoEl.videoHeight;
-            const ctx = c.getContext('2d');
-            ctx.drawImage(scrubVideoEl, 0, 0, c.width, c.height);
-            const frameBase64 = c.toDataURL('image/jpeg', 0.88);
 
+            scrubVideoEl.pause();
+            const vw = scrubVideoEl.videoWidth;
+            const vh = scrubVideoEl.videoHeight;
+            const mode = document.querySelector('input[name="scrubAspectMode"]:checked')?.value || 'original';
+
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+
+            if (mode === 'vertical') {
+                // Target 9:16 vertical crop
+                const targetRatio = 9 / 16;
+                let cropW = vw;
+                let cropH = vh;
+                let startX = 0;
+                let startY = 0;
+
+                if (vw / vh > targetRatio) {
+                    cropW = vh * targetRatio;
+                    startX = (vw - cropW) / 2;
+                } else {
+                    cropH = vw / targetRatio;
+                    startY = (vh - cropH) / 2;
+                }
+                c.width = Math.round(cropW);
+                c.height = Math.round(cropH);
+                ctx.drawImage(scrubVideoEl, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
+            } else if (mode === 'widescreen') {
+                // Target 16:9 widescreen crop
+                const targetRatio = 16 / 9;
+                let cropW = vw;
+                let cropH = vh;
+                let startX = 0;
+                let startY = 0;
+
+                if (vw / vh > targetRatio) {
+                    cropW = vh * targetRatio;
+                    startX = (vw - cropW) / 2;
+                } else {
+                    cropH = vw / targetRatio;
+                    startY = (vh - cropH) / 2;
+                }
+                c.width = Math.round(cropW);
+                c.height = Math.round(cropH);
+                ctx.drawImage(scrubVideoEl, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
+            } else {
+                // Original resolution
+                c.width = vw;
+                c.height = vh;
+                ctx.drawImage(scrubVideoEl, 0, 0, c.width, c.height);
+            }
+
+            const frameBase64 = c.toDataURL('image/jpeg', 0.92);
+
+            // Set to Thumbnail Input
             const thumbInput = document.getElementById('newThumbnail');
             const thumbFeedback = document.getElementById('newThumbFeedback');
             if (thumbInput) thumbInput.value = frameBase64;
             if (thumbFeedback) {
                 thumbFeedback.style.display = 'inline-flex';
-                thumbFeedback.innerHTML = `<i class="fa-solid fa-camera"></i> تم التقاط لقطة الثمبنيل بنجاح 📸`;
+                thumbFeedback.innerHTML = `<i class="fa-solid fa-camera"></i> تم التقاط لقطة الثمبنيل (${c.width} × ${c.height} px) 📸`;
             }
-            showToast('تم التقاط لقطة الثمبنيل من الفيديو بنجاح!');
+
+            // Display Live Captured Preview Card
+            const modeLabel = mode === 'vertical' ? 'طولي (9:16 Reels)' : (mode === 'widescreen' ? 'عرضي (16:9 HD)' : 'أبعاد الفيديو الأصلية');
+            showCapturedPreview(frameBase64, `الأبعاد: ${c.width} × ${c.height} px • التوقيت: ${formatTime(scrubVideoEl.currentTime)} • المقاس: ${modeLabel}`);
+
+            showToast('تم التقاط لقطة الثمبنيل من الفيديو بنجاح وتعيينها للمشروع!');
+        });
+    }
+
+    // Download Captured Image to PC
+    if (btnDownloadCapturedThumb && !btnDownloadCapturedThumb.dataset.bound) {
+        btnDownloadCapturedThumb.dataset.bound = "true";
+        btnDownloadCapturedThumb.addEventListener('click', () => {
+            if (!capturedThumbImgPreview || !capturedThumbImgPreview.src) return;
+            const a = document.createElement('a');
+            a.href = capturedThumbImgPreview.src;
+            a.download = `video-thumbnail-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('تم تحميل وحفظ صورة الثمبنيل على جهازك بنجاح!');
+        });
+    }
+
+    // Clear Captured Image
+    if (btnClearCapturedThumb && !btnClearCapturedThumb.dataset.bound) {
+        btnClearCapturedThumb.dataset.bound = "true";
+        btnClearCapturedThumb.addEventListener('click', () => {
+            if (capturedThumbPreviewCard) capturedThumbPreviewCard.style.display = 'none';
+            const thumbInput = document.getElementById('newThumbnail');
+            const thumbFeedback = document.getElementById('newThumbFeedback');
+            if (thumbInput) thumbInput.value = '';
+            if (thumbFeedback) thumbFeedback.style.display = 'none';
+            showToast('تمت إزالة اللقطة الملتقطة.');
         });
     }
 
@@ -2512,12 +2784,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const tuts = getSiteTutorials();
         const prods = getSiteProducts();
 
+        // Generate a unique version stamp based on export time
+        const now = new Date();
+        const versionStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+
         return `/**
  * ============================================================================
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
  * Last updated: ${new Date().toISOString()}
+ * Config Version: ${versionStamp}
+ * 
+ * ⚠️ هذا الملف مولَّد تلقائيًا من لوحة التحكم — لا تعدّله يدويًا.
+ * جميع بياناتك مخبوزة مباشرة هنا وستظهر على كل الأجهزة بشكل موحّد.
  */
 
 const STORAGE_KEYS = {
@@ -2531,8 +2811,27 @@ const STORAGE_KEYS = {
     THEME: 'site_theme',
     LANG: 'site_lang',
     CURRENCY: 'site_currency',
-    MASTER_AUTH: 'pro_portfolio_master_auth'
+    MASTER_AUTH: 'pro_portfolio_master_auth',
+    CONFIG_VER: 'pro_portfolio_config_version'
 };
+
+const CONFIG_VERSION = "${versionStamp}";
+
+// Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
+(function enforceConfigVersion() {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        const storedVer = localStorage.getItem(STORAGE_KEYS.CONFIG_VER);
+        if (storedVer !== CONFIG_VERSION) {
+            Object.values(STORAGE_KEYS).forEach(k => {
+                if (k !== STORAGE_KEYS.THEME && k !== STORAGE_KEYS.LANG && k !== STORAGE_KEYS.CURRENCY) {
+                    localStorage.removeItem(k);
+                }
+            });
+            localStorage.setItem(STORAGE_KEYS.CONFIG_VER, CONFIG_VERSION);
+        }
+    } catch (e) {}
+})();
 
 const DEFAULT_CONFIG = ${JSON.stringify(cfg, null, 4)};
 

@@ -18,8 +18,54 @@ const STORAGE_KEYS = {
     THEME: 'site_theme',
     LANG: 'site_lang',
     CURRENCY: 'site_currency',
-    MASTER_AUTH: 'pro_portfolio_master_auth'
+    MASTER_AUTH: 'pro_portfolio_master_auth',
+    CONFIG_VER: 'pro_portfolio_config_version'
 };
+
+/**
+ * CONFIG_VERSION — رقم إصدار البيانات المدمج في الكود.
+ * كل ما تضغط "تصدير config.js" من لوحة التحكم بعد تعديل بياناتك،
+ * يتم تحديث هذا الرقم تلقائيًا ليكون تاريخ ووقت التصدير.
+ * أي جهاز (موبايل، تابلت، كمبيوتر آخر) يفتح الموقع سيتعرف
+ * على الإصدار الجديد ويمسح البيانات القديمة تلقائيًا ويحمل البيانات الجديدة.
+ * ⚠️ لا تغير هذا الرقم يدويًا — يُحدَّث تلقائيًا عند التصدير.
+ */
+const CONFIG_VERSION = "20261015_001";
+
+// Auto-invalidate stale localStorage on any device when config version is newer
+(function enforceConfigVersion() {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        const storedVer = localStorage.getItem(STORAGE_KEYS.CONFIG_VER);
+        if (storedVer !== CONFIG_VERSION) {
+            // New version detected — wipe all data keys so DEFAULT_CONFIG takes over
+            Object.values(STORAGE_KEYS).forEach(k => {
+                if (k !== STORAGE_KEYS.THEME && k !== STORAGE_KEYS.LANG && k !== STORAGE_KEYS.CURRENCY) {
+                    localStorage.removeItem(k);
+                }
+            });
+            localStorage.setItem(STORAGE_KEYS.CONFIG_VER, CONFIG_VERSION);
+        }
+    } catch (e) {}
+})();
+
+// Self-healing: if running on salahsalehbesoo.github.io, ensure stale lock cache is purged immediately
+(function selfHealSalahDomain() {
+    try {
+        if (typeof window !== 'undefined' && window.location) {
+            const h = (window.location.hostname || '').toLowerCase();
+            if (h === 'salahsalehbesoo.github.io' || h.endsWith('.salahsalehbesoo.github.io')) {
+                const raw = localStorage.getItem(STORAGE_KEYS.CONFIG);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (!parsed.security || !parsed.security.licenseKey || parsed.security.licenseKey !== 'PRO-salahsalehbesoo.github.io-F1-7E01F36253C6') {
+                        localStorage.removeItem(STORAGE_KEYS.CONFIG);
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+})();
 
 const DEFAULT_CONFIG = {
     profile: {
@@ -882,10 +928,13 @@ function renderActivationLockScreen(currentHost) {
 
 function verifyLicense() {
     const config = getSiteConfig();
-    const currentHost = window.location.hostname;
+    const currentHost = (window.location.hostname || '').toLowerCase();
+    const currentPath = (window.location.pathname || '').toLowerCase();
 
-    // 0. Exclude admin.html and developer.html from locking so the owner can always access settings & activate key
-    if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('developer.html')) {
+    // 0. Exclude admin.html and developer.html from locking unconditionally
+    if (currentPath.includes('admin') || currentPath.includes('developer')) {
+        const overlay = document.getElementById('antiTheftLockOverlay');
+        if (overlay) overlay.remove();
         return { status: 'admin_bypass', allowFooter: true };
     }
 
@@ -894,9 +943,16 @@ function verifyLicense() {
         return { status: 'dev_unlocked', allowFooter: true };
     }
 
-    // 2. Check Whitelist or Cryptographic License
+    // 2. Salah's official domain is ALWAYS unconditionally licensed (White-Label Master)
+    if (currentHost === 'salahsalehbesoo.github.io' || currentHost.endsWith('.salahsalehbesoo.github.io')) {
+        const overlay = document.getElementById('antiTheftLockOverlay');
+        if (overlay) overlay.remove();
+        return { status: 'licensed', allowFooter: true };
+    }
+
+    // 3. Check Whitelist or Cryptographic License
     const authorized = config.security.authorizedDomains || [];
-    const isWhitelisted = authorized.some(d => d && (d === currentHost || currentHost.endsWith('.' + d)));
+    const isWhitelisted = authorized.some(d => d && (d.toLowerCase() === currentHost || currentHost.endsWith('.' + d.toLowerCase())));
 
     const licCheck = verifyLicenseKey(config.security.licenseKey, currentHost);
 
@@ -905,7 +961,7 @@ function verifyLicense() {
         return { status: 'licensed', allowFooter: canEditFooter };
     }
 
-    // 3. Unauthorized live domain -> Trigger Anti-theft Lock Screen!
+    // 4. Unauthorized live domain -> Trigger Anti-theft Lock Screen!
     console.warn(`[Anti-Theft] Unauthorized domain (${currentHost}). Locking application.`);
     setTimeout(() => renderActivationLockScreen(currentHost), 300);
     return { status: 'locked', allowFooter: false };
