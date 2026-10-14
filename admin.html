@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم الشاملة | Control Center</title>
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
@@ -41,7 +42,7 @@
                     <label class="login-label"><i class="fa-solid fa-user"></i> اسم المستخدم أو البريد:</label>
                     <div class="login-input-box">
                         <i class="fa-solid fa-at login-box-icon"></i>
-                        <input type="text" id="adminUsernameInput" class="login-text-input" placeholder="اسم المستخدم (الافتراضي: admin)" value="admin" autocomplete="username">
+                        <input type="text" id="adminUsernameInput" class="login-text-input" placeholder="أدخل اسم المستخدم..." autocomplete="username">
                     </div>
                 </div>
 
@@ -50,7 +51,7 @@
                     <label class="login-label"><i class="fa-solid fa-lock"></i> كلمة المرور أو رمز PIN:</label>
                     <div class="login-input-box">
                         <i class="fa-solid fa-key login-box-icon"></i>
-                        <input type="password" id="adminPasswordInput" class="login-text-input" placeholder="أدخل كلمة المرور (الافتراضي: 123456)..." autocomplete="current-password" autofocus>
+                        <input type="password" id="adminPasswordInput" class="login-text-input" placeholder="أدخل كلمة المرور..." autocomplete="current-password" autofocus>
                         <button type="button" id="btnToggleLoginPass" class="login-pass-toggle" title="إظهار / إخفاء كلمة المرور">
                             <i class="fa-solid fa-eye"></i>
                         </button>
@@ -75,29 +76,14 @@
                 </button>
             </form>
 
-            <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--admin-muted);">
-                <span>الافتراضي: <strong>admin</strong> / <strong>123456</strong></span>
-                <button type="button" id="btnDirectDefaultLogin" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--admin-emerald); color: #10b981; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
-                    <i class="fa-solid fa-bolt"></i> دخول مباشر بـ 123456
-                </button>
-            </div>
-
-            <!-- PIN Reset Box (Shown when forgot PIN is clicked) -->
-            <div id="pinResetBox" class="pin-reset-box" style="display: none; margin-top: 1.25rem; text-align: right;">
+            <!-- PIN Reset Box (Shown when forgot PIN is clicked - Requires Email/Phone/Master Verification) -->
+            <div id="pinResetBox" class="pin-reset-box" style="display: none; margin-top: 1.25rem; text-align: right; border-top: 1px solid var(--admin-border); padding-top: 1rem;">
                 <h3 style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">
-                    <i class="fa-solid fa-rotate-left"></i> استعادة وإعادة تعيين كلمة المرور
+                    <i class="fa-solid fa-shield-halved"></i> استعادة وتعيين كلمة مرور جديدة
                 </h3>
                 <p style="font-size: 0.8rem; color: var(--admin-muted); margin-bottom: 0.9rem; line-height: 1.5;">
-                    يمكنك إعادة تعيين كلمة المرور إلى الافتراضية بنقرة واحدة، أو التحقق بالبريد / الهاتف المسجل.
+                    لدواعي الأمان، أدخل بريدك المسجل أو رقم هاتفك أو مفتاح المطور للتحقق من هويتك وتعيين كلمة مرور جديدة:
                 </p>
-                <div style="margin-bottom: 1rem;">
-                    <button type="button" id="btnResetToDefaultPin" style="width: 100%; padding: 0.75rem; background: rgba(0, 113, 227, 0.15); border: 1px solid var(--admin-blue); color: var(--admin-blue); border-radius: 12px; font-weight: 800; cursor: pointer;">
-                        <i class="fa-solid fa-arrows-rotate"></i> إعادة الضبط للافتراضي (123456) والدخول فوراً
-                    </button>
-                </div>
-                <div style="position: relative; text-align: center; margin: 1rem 0; border-top: 1px dashed var(--admin-border);">
-                    <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--admin-card); padding: 0 8px; font-size: 0.75rem; color: var(--admin-muted);">أو تعيين كلمة مرور جديدة</span>
-                </div>
                 <div class="form-group-admin" style="margin-bottom: 0.65rem;">
                     <input type="text" id="resetRecoveryContact" class="form-input-admin" placeholder="البريد الإلكتروني أو رقم الهاتف أو مفتاح المطور..." style="text-align: right; font-size: 0.9rem;">
                 </div>
