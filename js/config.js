@@ -3,7 +3,7 @@
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
- * Last updated: 2026-10-15T13:01:31.821Z
+ * Last updated: 2026-10-15T14:39:58.602Z
  */
 
 const STORAGE_KEYS = {
@@ -201,7 +201,23 @@ const DEFAULT_CONFIG = {
     }
 };
 
-const DEFAULT_PROJECTS = [];
+const DEFAULT_PROJECTS = [
+    {
+        "id": "proj-1792075156372",
+        "titleAr": "ريل اعلاني وكالة تسويق b2b",
+        "titleEn": "ريل اعلاني وكالة تسويق b2b",
+        "category": "shorts",
+        "aspect": "vertical",
+        "software": "After effects",
+        "tag": "إعلاني",
+        "views": "+250K",
+        "retention": "80%",
+        "videoUrl": "https://drive.google.com/file/d/1tPqV24Ex5AuFqf3lToKWmzhwHsRco-5W/preview",
+        "thumbnailUrl": "https://lh3.googleusercontent.com/d/1tPqV24Ex5AuFqf3lToKWmzhwHsRco-5W=w1200",
+        "descAr": "ريل اعلاني وكالة تسويق b2b",
+        "descEn": "ريل اعلاني وكالة تسويق b2b"
+    }
+];
 
 const DEFAULT_TUTORIALS = [];
 
