@@ -3,7 +3,7 @@
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
- * Last updated: 2026-10-15T07:11:55.903Z
+ * Last updated: 2026-10-15T07:51:40.212Z
  */
 
 const STORAGE_KEYS = {
@@ -176,7 +176,7 @@ const DEFAULT_CONFIG = {
     },
     "sections": {
         "store": false,
-        "tutorials": true,
+        "tutorials": false,
         "calculator": true,
         "reviews": true,
         "faq": true
@@ -203,44 +203,7 @@ const DEFAULT_CONFIG = {
 
 const DEFAULT_PROJECTS = [];
 
-const DEFAULT_TUTORIALS = [
-    {
-        "id": "tut-1",
-        "titleAr": "أسرار مونتاج الـ High Retention: كيف تجعل المشاهد يكمل الفيديو للنهاية؟",
-        "titleEn": "High-Retention Editing Secrets: Hooking Viewers to the Last Second",
-        "category": "retention",
-        "categoryNameAr": "استراتيجيات تفاعل",
-        "readTime": "5 دقائق قراءة",
-        "date": "2026-10-10",
-        "views": 1420,
-        "summaryAr": "دليل عملي لكيفية بناء الـ Visual Pacing وتغيير المشاهد كل 2-3 ثوانٍ مع اختيار المؤثر الصوتي الأنسب بدون تشتيت المشاهد.",
-        "contentAr": "\n            <h3>1. قاعدة أول 3 ثوانٍ (The Visual Hook):</h3>\n            <p>لا تبدأ الفيديو بمقدمة طويلة أو ترحيب تقليدي. ابدأ فوراً بنتيجة الحدث، أو بسؤال صادم، أو بلقطة ديناميكية مع مؤثر صوتي حاد (Whoosh + Impact) لجذب انتباه الإبهام ومنعه من التمرير.</p>\n            \n            <h3>2. تناسق الـ Pacing البصري مع نبض الموسيقى:</h3>\n            <p>التقطيع العشوائي يربك العين؛ استخدم الـ Beat Drop لتغيير زوايا الكاميرا، وضع الـ B-Rolls عند كل فكرة جديدة لتوضيح المعنى بصرياً بدلاً من الاكتفاء بالحديث.</p>\n            \n            <h3>3. هندسة الصوت (Sound Design) هي 50% من جودة الفيديو:</h3>\n            <p>الساوند ديزاين هو ما يعطي الحياة لكل حركة: أصوات النقرات (Mouse clicks)، حركة الورق (Paper tear)، والتأثيرات المحيطية (Riser) قبل كل نقطة رئيسية.</p>\n        "
-    },
-    {
-        "id": "tut-2",
-        "titleAr": "الدليل الشامل لتصحيح الألوان (Color Grading) في DaVinci Resolve",
-        "titleEn": "Complete Cinematic Color Grading Guide in DaVinci Resolve",
-        "category": "color",
-        "categoryNameAr": "تلوين سينمائي",
-        "readTime": "7 دقائق قراءة",
-        "date": "2026-10-08",
-        "views": 980,
-        "summaryAr": "شرح هيكل الـ Nodes الاحترافي، كيفية تحويل الـ Log إلى Rec.709، وضبط الـ Skin Tones بدقة ميكروسكوبية.",
-        "contentAr": "\n            <h3>1. هيكلية الـ Node Tree الاحترافية:</h3>\n            <p>افصل دائماً بين مرحلة التصحيح الأولي (Color Correction) ومرحلة التدرج الإبداعي (Color Grading). ابدأ بـ Exposure، ثم Contrast، ثم Balance، ثم Skin Tones في عقدة منفصلة.</p>\n            \n            <h3>2. استخدام Color Space Transform (CST):</h3>\n            <p>تجنب استخدام LUTs تحويلية عشوائية؛ استخدم دائماً أداة CST المدمجة في دافينشي لتحويل كود الكاميرا (Sony S-Log3 أو Canon C-Log) إلى Rec.709 للحفاظ على كامل النطاق الديناميكي للضوء.</p>\n        "
-    },
-    {
-        "id": "tut-3",
-        "titleAr": "كيف تسعّر خدماتك كمونتير حر في سوق الخليج ومصر لعام 2026؟",
-        "titleEn": "Freelance Video Editor Pricing Blueprint for 2026",
-        "category": "freelance",
-        "categoryNameAr": "بيزنس وفريلانس",
-        "readTime": "6 دقائق قراءة",
-        "date": "2026-10-05",
-        "views": 1850,
-        "summaryAr": "توقف عن التسعير بالساعة! كيف تسعّر بنظام القيمة (Value-based Pricing) والباقات الشهرية لضمان دخل ثابت ومستقر.",
-        "contentAr": "\n            <h3>1. الانتقال من بيع الفيديوهات الفردية إلى الباقات الشهرية:</h3>\n            <p>العميل المستمر (صانع المحتوى أو البراند) يفضل دفع اشتراك شهري يغطي 8 إلى 12 ريلز شهرياً بدلاً من التفاوض على كل فيديو. هذا يمنحك استقراراً مالياً ويقلل مجهود البحث عن عملاء جدد.</p>\n            \n            <h3>2. احسب العائد على الاستثمار للعميل (ROI):</h3>\n            <p>عندما تطلب 50$ أو 100$ للفيديو، وضّح للعميل كيف سيجلب له هذا الفيديو مبيعات أو متابعين تزيد قيمتهم عن تكلفة المونتاج بعشرة أضعاف.</p>\n        "
-    }
-];
+const DEFAULT_TUTORIALS = [];
 
 const DEFAULT_PRODUCTS = [
     {
