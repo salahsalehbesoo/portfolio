@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -17,7 +17,10 @@
         rel="stylesheet">
 
     <!-- Stylesheet (Local First for Zero Latency) -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20261015_184000">
+
+    <!-- Configuration & Central Data Store (Synchronous head load for zero-FOUC and instant mobile hydration) -->
+    <script src="js/config.js?v=20261015_184000"></script>
 
     <!-- Font Awesome Icons 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -316,8 +319,9 @@
                         try {
                             var card = document.getElementById('heroProfileCard');
                             var rawCfg = localStorage.getItem('pro_portfolio_config');
-                            var cfg = rawCfg ? JSON.parse(rawCfg) : null;
-                            var p = (cfg && cfg.profile) ? cfg.profile : null;
+                            var defCfg = (typeof DEFAULT_CONFIG !== 'undefined' && DEFAULT_CONFIG) ? DEFAULT_CONFIG : null;
+                            var cfg = rawCfg ? JSON.parse(rawCfg) : defCfg;
+                            var p = (cfg && cfg.profile) ? cfg.profile : (defCfg ? defCfg.profile : null);
                             var lang = localStorage.getItem('site_lang') || (cfg && cfg.branding && cfg.branding.defaultLang) || 'ar';
                             var isAr = lang === 'ar';
 
@@ -328,13 +332,13 @@
                             if (c) c.src = (p && p.coverUrl) ? p.coverUrl : 'img/default-cover.svg';
 
                             var n = document.getElementById('heroProfileName');
-                            if (n) n.textContent = p ? (isAr ? (p.nameAr || p.nameEn || '') : (p.nameEn || p.nameAr || '')) : (isAr ? 'صانع ومحرر فيديو سينمائي' : 'Creative Video Editor & Motion Designer');
+                            if (n) n.textContent = p ? (isAr ? (p.nameAr || p.nameEn || '') : (p.nameEn || p.nameAr || '')) : (isAr ? 'صلاح صالح' : 'Salah Saleh');
 
                             var r = document.getElementById('heroProfileRole');
                             if (r) r.textContent = p ? (isAr ? (p.roleAr || p.roleEn || '') : (p.roleEn || p.roleAr || '')) : (isAr ? 'مونتير فيديو ومصمم موشن جرافيكس سينمائي' : 'Cinematic Video Editor & Motion Designer');
 
                             var b = document.getElementById('heroProfileBio');
-                            if (b) b.textContent = p ? (isAr ? (p.bioAr || p.bioEn || '') : (p.bioEn || p.bioAr || '')) : (isAr ? 'صناعة محتوى سينمائي عالي الجودة ومونتاج احترافي مخصص لصناع المحتوى والبراندات لتحويل المشاهدات إلى تفاعل حقيقي.' : 'Crafting high-retention cinematic edits and kinetic visuals for creators and brands.');
+                            if (b) b.textContent = p ? (isAr ? (p.bioAr || p.bioEn || '') : (p.bioEn || p.bioAr || '')) : (isAr ? 'بنمنتج فيديوهاتك بشغف واحترافية ليتحول كل إطار إلى تجربة بصرية سينمائية تأسر جمهورك وتضاعف المبيعات والمشاهدات.' : 'Crafting high-retention cinematic edits and kinetic visuals for creators and brands.');
 
                             var e = document.getElementById('heroExpBadge');
                             var yrs = (p && p.expYears) ? p.expYears : 3;
@@ -845,10 +849,9 @@
     </a>
 
     <!-- Scripts -->
-    <script src="js/config.js?v=20261015_003"></script>
-    <script src="js/translations.js?v=20261015_003"></script>
-    <script src="js/analytics.js?v=20261015_003"></script>
-    <script src="js/main.js?v=20261015_003"></script>
+    <script src="js/translations.js?v=20261015_184000"></script>
+    <script src="js/analytics.js?v=20261015_184000"></script>
+    <script src="js/main.js?v=20261015_184000"></script>
 </body>
 
 </html>

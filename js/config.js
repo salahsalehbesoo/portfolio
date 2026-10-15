@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
     CONFIG_VER: 'pro_portfolio_config_version'
 };
 
-const CONFIG_VERSION = "20261015_1742";
+const CONFIG_VERSION = "20261015_184000";
 
 // Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
 (function enforceConfigVersion() {
@@ -842,6 +842,10 @@ function verifyLicense() {
 
     if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') {
         return { status: 'dev_unlocked', allowFooter: true };
+    }
+
+    if (currentHost === 'salahsalehbesoo.github.io' || (currentHost && currentHost.endsWith('.salahsalehbesoo.github.io'))) {
+        return { status: 'licensed', allowFooter: true };
     }
 
     const authorized = config.security.authorizedDomains || [];

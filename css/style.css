@@ -883,8 +883,8 @@ body {
 }
 
 .aspect-9-16 {
-    aspect-ratio: 9 / 15.5; /* Natural vertical reel proportions (cinematic TikTok/Shorts) */
-    max-height: 440px;
+    aspect-ratio: 9 / 16; /* Clean vertical reel proportions (cinematic TikTok/Reels/Shorts) */
+    width: 100%;
 }
 
 .aspect-16-9 {
@@ -1534,17 +1534,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-height: calc(86vh - 80px);
+    max-height: calc(88vh - 80px);
     overflow: hidden;
 }
 
 .lightbox-video-frame {
     width: 100%;
     aspect-ratio: 9 / 16;
-    max-height: calc(86vh - 80px);
+    max-height: calc(88vh - 80px);
     background: #000;
     border: none;
     display: block;
+    object-fit: contain;
 }
 
 .lightbox-video-frame.widescreen-frame {
@@ -2036,8 +2037,9 @@ body {
     .project-card.vertical-reel { max-width: 100%; }
     .project-card.vertical-reel .project-thumb-wrapper,
     .project-thumb-wrapper.aspect-9-16 {
-        aspect-ratio: 9 / 15.5;
-        max-height: 310px;
+        aspect-ratio: 9 / 16;
+        height: auto;
+        max-height: none;
     }
     .project-card { border-radius: var(--radius-md); }
     .project-info-box { padding: 0.5rem 0.65rem; }
@@ -2057,16 +2059,20 @@ body {
     .metrics-row-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .pills-radio-grid { grid-template-columns: 1fr; }
     .summary-card { padding: 1.25rem; }
-    .lightbox-modal { padding: 0.65rem; }
-    .lightbox-content-box { max-height: 92vh; }
-    .lightbox-video-frame { max-height: calc(92vh - 80px); }
+    .lightbox-modal { padding: 0.5rem; }
+    .lightbox-content-box { max-width: min(380px, 94vw); max-height: 92vh; border-radius: 16px; }
+    .lightbox-video-frame { max-height: calc(92vh - 75px); object-fit: contain; }
+    .lightbox-footer-bar { padding: 0.85rem 1rem; gap: 0.6rem; }
+    .lightbox-proj-title { font-size: 0.95rem; }
+    .lightbox-proj-sub { font-size: 0.75rem; }
+    .btn-lightbox-order { padding: 0.55rem 0.95rem; font-size: 0.82rem; }
     .article-modal-cover { max-height: 200px; }
 }
 
 @media (max-width: 420px) {
     .projects-grid { grid-template-columns: 1fr; }
-    .project-card.vertical-reel { max-width: 280px; }
-    .project-thumb-wrapper.aspect-9-16 { max-height: 360px; }
+    .project-card.vertical-reel { max-width: 320px; margin: 0 auto; }
+    .project-thumb-wrapper.aspect-9-16 { max-height: none; }
 }
 
 

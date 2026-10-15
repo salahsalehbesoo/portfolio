@@ -437,13 +437,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Parse video source
         let cleanUrl = (videoUrl || '').trim();
         let isDirectVideo = false;
+        let gdriveId = null;
 
         if (cleanUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) || cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:video/')) {
             isDirectVideo = true;
-        } else if (cleanUrl.includes('drive.google.com/file/d/')) {
-            const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                cleanUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+        } else if (cleanUrl.includes('drive.google.com') || cleanUrl.includes('drive.usercontent.google.com')) {
+            const m1 = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            const m2 = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            gdriveId = (m1 && m1[1]) || (m2 && m2[1]);
+            if (gdriveId) {
+                // Direct high-performance stream URL without Google Drive's iframe watermark or intrusive mobile overlays
+                cleanUrl = `https://drive.usercontent.google.com/download?id=${gdriveId}&export=download`;
+                isDirectVideo = true;
             }
         } else if (cleanUrl.includes('youtube.com/watch?v=')) {
             const match = cleanUrl.match(/v=([a-zA-Z0-9_-]+)/);
@@ -468,7 +473,26 @@ document.addEventListener('DOMContentLoaded', () => {
             videoEl.controls = true;
             videoEl.autoplay = true;
             videoEl.playsInline = true;
+            videoEl.setAttribute('playsinline', '');
+            videoEl.setAttribute('webkit-playsinline', '');
             videoEl.className = `lightbox-video-frame ${!isVert ? 'widescreen-frame' : ''}`;
+            videoEl.style.objectFit = 'contain';
+
+            // Seamless fallback to preview iframe if direct streaming fails
+            if (gdriveId) {
+                videoEl.onerror = () => {
+                    console.warn('Direct stream failed, falling back to Google Drive preview iframe');
+                    lightboxPlayerContainer.innerHTML = '';
+                    const fallbackIframe = document.createElement('iframe');
+                    fallbackIframe.src = `https://drive.google.com/file/d/${gdriveId}/preview`;
+                    fallbackIframe.className = `lightbox-video-frame ${!isVert ? 'widescreen-frame' : ''}`;
+                    fallbackIframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+                    fallbackIframe.setAttribute('allowfullscreen', 'true');
+                    fallbackIframe.title = title || 'Video Showcase';
+                    lightboxPlayerContainer.appendChild(fallbackIframe);
+                };
+            }
+
             lightboxPlayerContainer.appendChild(videoEl);
         } else {
             const iframe = document.createElement('iframe');
