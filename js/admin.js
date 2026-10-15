@@ -3445,11 +3445,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function publishToGitHub() {
-        const username = document.getElementById('ghUsername')?.value.trim();
-        const repo = document.getElementById('ghRepoName')?.value.trim();
+        let username = document.getElementById('ghUsername')?.value.trim() || '';
+        let repo = document.getElementById('ghRepoName')?.value.trim() || '';
         const branch = document.getElementById('ghBranch')?.value.trim() || 'main';
-        const token = document.getElementById('ghToken')?.value.trim();
+        let token = document.getElementById('ghToken')?.value.trim().replace(/^['"]|['"]$/g, '') || '';
         const feedback = document.getElementById('ghPublishFeedback');
+
+        // Auto-cleanup repository and username if full URL was pasted
+        if (repo.startsWith('http://') || repo.startsWith('https://')) {
+            try {
+                const urlObj = new URL(repo);
+                const pathParts = urlObj.pathname.replace(/^\/|\/$/g, '').split('/');
+                if (pathParts.length >= 2) {
+                    if (!username) username = pathParts[0];
+                    repo = pathParts[1];
+                } else if (pathParts.length === 1) {
+                    repo = pathParts[0];
+                }
+            } catch (e) {}
+        }
+        repo = repo.replace(/\.git$/i, '');
+        if (repo.includes('/')) {
+            const parts = repo.split('/');
+            if (!username) username = parts[0];
+            repo = parts[1];
+        }
+
+        // Update inputs with clean values
+        if (document.getElementById('ghUsername') && username) document.getElementById('ghUsername').value = username;
+        if (document.getElementById('ghRepoName') && repo) document.getElementById('ghRepoName').value = repo;
+        if (document.getElementById('ghToken') && token) document.getElementById('ghToken').value = token;
 
         if (!username || !repo || !token) {
             if (feedback) {
@@ -3458,6 +3483,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedback.style.border = '1px solid var(--admin-crimson)';
                 feedback.style.color = '#ef4444';
                 feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> يرجى إدخال اسم المستخدم والمستودع ورمز Token الخاص بـ GitHub.';
+            }
+            return;
+        }
+
+        // Validation for common token mistakes (entering normal password)
+        if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+            if (feedback) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+                feedback.style.border = '1px solid var(--admin-crimson)';
+                feedback.style.color = '#ef4444';
+                feedback.innerHTML = `
+                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>خطأ في نوع الرمز:</strong> الرمز الذي أدخلته يبدو أنه كلمة سر حسابك العادية وليس Personal Access Token.<br>
+                    <span style="font-size:0.85rem; color:#fca5a5;">جيت هب لا يقبل كلمات السر العادية في الـ API. الرمز السليم يبدأ دائماً بـ <code>ghp_</code>.</span><br>
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio+Admin+Deploy" target="_blank" style="color:#60a5fa; text-decoration:underline; font-size:0.85rem; display:inline-block; margin-top:0.4rem;">
+                        👉 اضغط هنا لإنشاء رمز Token بضغطة زر واحدة (مع صلاحية repo المحددة تلقائياً)
+                    </a>
+                `;
             }
             return;
         }
@@ -3473,22 +3516,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const cleanRepo = repo.includes('/') ? repo : `${username}/${repo}`;
+            const cleanRepo = `${username}/${repo}`;
             const apiUrl = `https://api.github.com/repos/${cleanRepo}/contents/js/config.js`;
+            const authHeader = token.startsWith('ghp_') ? `token ${token}` : `Bearer ${token}`;
 
             let currentSha = null;
             try {
                 const getRes = await fetch(`${apiUrl}?ref=${branch}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': authHeader,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
+                if (getRes.status === 401) {
+                    throw new Error("Bad credentials");
+                }
                 if (getRes.ok) {
                     const getData = await getRes.json();
                     currentSha = getData.sha;
                 }
             } catch (e) {
+                if (e.message === "Bad credentials") throw e;
                 console.warn('Could not fetch existing SHA:', e);
             }
 
@@ -3507,7 +3555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const putRes = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': authHeader,
                     'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
@@ -3528,7 +3576,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <br>
                     <span style="font-size:0.82rem; color:var(--admin-muted);">يقوم GitHub الآن ببناء الموقع وسيتحدث الرابط العام لكل زوار العالم خلال 30 ثانية.</span>
                     <br>
-                    <a href="https://${username}.github.io/${repo.split('/').pop()}/" target="_blank" style="color:var(--admin-blue); text-decoration:underline; font-size:0.85rem; margin-top:0.4rem; display:inline-block;">
+                    <a href="https://${username}.github.io/${repo}/" target="_blank" style="color:var(--admin-blue); text-decoration:underline; font-size:0.85rem; margin-top:0.4rem; display:inline-block;">
                         فتح رابط موقعك المباشر على GitHub Pages <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                 `;
@@ -3536,11 +3584,23 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('🚀 تم نشر الموقع وتحديث كود GitHub بنجاح!');
         } catch (err) {
             console.error('GitHub publish error:', err);
+            let userMsg = err.message;
+            if (err.message.includes('Bad credentials')) {
+                userMsg = 'الرمز المدخل غير صالح (Bad credentials). تأكد من إنشاء Token سليم يبدأ بـ ghp_ من الرابط بالأسفل وليس كلمة سر الحساب.';
+            } else if (err.message.includes('Not Found')) {
+                userMsg = `المستودع أو الفرع غير موجود (Not Found). تأكد من اسم المستخدم (${username}) واسم المستودع (${repo}) والفرع (${branch}).`;
+            }
             if (feedback) {
                 feedback.style.background = 'rgba(239, 68, 68, 0.15)';
                 feedback.style.border = '1px solid var(--admin-crimson)';
                 feedback.style.color = '#ef4444';
-                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> فشل النشر: ${err.message}. تأكد من صحة اسم المستودع وصلاحية الـ Token (scope: repo).`;
+                feedback.innerHTML = `
+                    <i class="fa-solid fa-circle-xmark"></i> فشل النشر: ${userMsg}
+                    <br>
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio+Admin+Deploy" target="_blank" style="color:#60a5fa; text-decoration:underline; font-size:0.85rem; display:inline-block; margin-top:0.5rem;">
+                        👉 اضغط هنا لإنشاء رمز Token جديد من GitHub بنقرة واحدة
+                    </a>
+                `;
             }
         }
     }

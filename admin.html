@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -1499,9 +1499,14 @@
                                     <input type="password" id="ghToken" class="form-input-admin" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
                                     <button type="button" class="btn-icon-admin" id="btnToggleGhToken" title="إظهار / إخفاء الرمز"><i class="fa-solid fa-eye"></i></button>
                                 </div>
-                                <span style="font-size:0.75rem; color:var(--admin-muted); display:block; margin-top:0.3rem;">
-                                    يمكنك إنشاء الرمز مجاناً من حسابك: GitHub > Settings > Developer Settings > Personal Access Tokens (صلاحية repo).
-                                </span>
+                                <div style="margin-top:0.4rem;">
+                                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio+Admin+Deploy" target="_blank" style="display:inline-flex; align-items:center; gap:0.4rem; color:#60a5fa; text-decoration:none; font-weight:700; font-size:0.82rem; background:rgba(96,165,250,0.1); padding:0.4rem 0.85rem; border-radius:8px; border:1px solid rgba(96,165,250,0.3);">
+                                        <i class="fa-solid fa-key"></i> اضغط هنا لإنشاء الرمز فورياً من GitHub بنقرة واحدة (الصلاحيات محددة جاهزة)
+                                    </a>
+                                    <span style="font-size:0.75rem; color:var(--admin-muted); display:block; margin-top:0.3rem;">
+                                        ⚠️ لا تدخل كلمة سر حسابك العادية؛ جيت هب يقبل فقط رمز Token يبدأ بـ <code>ghp_</code>.
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -1588,9 +1593,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js?v=20261014_2"></script>
-    <script src="js/analytics.js?v=20261014_2"></script>
-    <script src="js/admin.js?v=20261014_2"></script>
+    <script src="js/config.js?v=20261015_003"></script>
+    <script src="js/analytics.js?v=20261015_003"></script>
+    <script src="js/admin.js?v=20261015_003"></script>
 </body>
 
 </html>
+
