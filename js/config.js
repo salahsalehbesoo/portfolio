@@ -3,8 +3,8 @@
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
- * Last updated: 2026-10-16T22:10:32.484Z
- * Config Version: 20261017_011032
+ * Last updated: 2026-10-16T22:12:20.974Z
+ * Config Version: 20261017_011220
  * 
  * ⚠️ هذا الملف مولَّد تلقائيًا من لوحة التحكم — لا تعدّله يدويًا.
  * جميع بياناتك مخبوزة مباشرة هنا وستظهر على كل الأجهزة بشكل موحّد.
@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
     CONFIG_VER: 'pro_portfolio_config_version'
 };
 
-const CONFIG_VERSION = "20261017_011032";
+const CONFIG_VERSION = "20261017_011220";
 
 // Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
 (function enforceConfigVersion() {
@@ -126,7 +126,7 @@ const DEFAULT_CONFIG = {
         }
     ],
     "branding": {
-        "accentColor": "#ef4444",
+        "accentColor": "#0071e3",
         "theme": "dark",
         "defaultLang": "ar",
         "showParticles": true,
