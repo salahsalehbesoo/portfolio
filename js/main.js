@@ -460,29 +460,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const m1 = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
             const m2 = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             gdriveId = (m1 && m1[1]) || (m2 && m2[1]);
-            if (gdriveId) {
-                // Direct high-performance inline stream without Google Drive's iframe watermark or intrusive mobile overlays
-                cleanUrl = `https://drive.usercontent.google.com/download?id=${gdriveId}&export=open`;
-                isDirectVideo = true;
-            }
         } else if (cleanUrl.includes('youtube.com/watch?v=')) {
             const match = cleanUrl.match(/v=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
-                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`;
+                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
             }
         } else if (cleanUrl.includes('youtu.be/')) {
             const match = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
-                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`;
+                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
             }
         } else if (cleanUrl.includes('youtube.com/shorts/')) {
             const match = cleanUrl.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
-                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`;
+                cleanUrl = `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
             }
         }
 
-        if (isDirectVideo) {
+        if (gdriveId) {
+            // High-performance Google Drive preview with Mobile Desktop Viewport Emulation
+            // This completely eliminates the intrusive mobile touch overlay HUD [ ⏪ 10 ] [ ▶ ] [ ⏩ 10 ]
+            const scaler = document.createElement('div');
+            scaler.className = `gdrive-iframe-scaler ${!isVert ? 'widescreen-frame' : ''}`;
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://drive.google.com/file/d/${gdriveId}/preview`;
+            iframe.className = `lightbox-video-frame gdrive-preview-iframe ${!isVert ? 'widescreen-frame' : ''}`;
+            iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.title = title || 'Google Drive Video Showcase';
+
+            scaler.appendChild(iframe);
+            lightboxPlayerContainer.appendChild(scaler);
+        } else if (isDirectVideo) {
             const videoEl = document.createElement('video');
             videoEl.src = cleanUrl;
             videoEl.controls = true;
@@ -495,31 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
             videoEl.preload = 'metadata';
             videoEl.className = `lightbox-video-frame ${!isVert ? 'widescreen-frame' : ''}`;
             videoEl.style.objectFit = 'contain';
-
-            // Clean fallback handling for Google Drive streams
-            if (gdriveId) {
-                let hasRetried = false;
-                videoEl.onerror = () => {
-                    if (!hasRetried) {
-                        hasRetried = true;
-                        // Retry with direct google drive usercontent
-                        videoEl.src = `https://drive.google.com/uc?export=open&id=${gdriveId}`;
-                        videoEl.load();
-                        videoEl.play().catch(() => {});
-                        return;
-                    }
-                    console.warn('Direct stream failed, falling back to clean preview');
-                    lightboxPlayerContainer.innerHTML = '';
-                    const fallbackIframe = document.createElement('iframe');
-                    fallbackIframe.src = `https://drive.google.com/file/d/${gdriveId}/preview`;
-                    fallbackIframe.className = `lightbox-video-frame ${!isVert ? 'widescreen-frame' : ''}`;
-                    fallbackIframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-                    fallbackIframe.setAttribute('allowfullscreen', 'true');
-                    fallbackIframe.title = title || 'Video Showcase';
-                    lightboxPlayerContainer.appendChild(fallbackIframe);
-                };
-            }
-
             lightboxPlayerContainer.appendChild(videoEl);
             videoEl.play().catch(() => {});
         } else {

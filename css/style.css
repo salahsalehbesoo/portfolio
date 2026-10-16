@@ -1580,6 +1580,31 @@ body {
     aspect-ratio: 16 / 9;
 }
 
+/* Google Drive Lightbox Scaler - Eliminates intrusive mobile center touch HUD */
+.gdrive-iframe-scaler {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.gdrive-iframe-scaler.widescreen-frame {
+    aspect-ratio: 16 / 9;
+    max-height: 100%;
+}
+
+.gdrive-preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #000;
+    display: block;
+}
+
 .lightbox-footer-bar {
     background: rgba(14, 14, 20, 0.98);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -2097,6 +2122,10 @@ body {
         display: flex;
         flex-direction: column;
     }
+    .lightbox-content-box.widescreen-mode {
+        height: auto !important;
+        max-height: 90vh;
+    }
     .lightbox-player-wrapper {
         flex: 1;
         min-height: 0;
@@ -2108,6 +2137,17 @@ body {
         height: 100%;
         max-height: 100%;
         object-fit: contain;
+    }
+    /* Desktop Viewport Emulation on Mobile for Google Drive:
+       Forces Drive to switch from mobile touch UI to desktop UI,
+       completely eliminating the intrusive center buttons [ ⏪ 10 ] [ ▶ ] [ ⏩ 10 ] */
+    .gdrive-iframe-scaler .gdrive-preview-iframe {
+        width: 155% !important;
+        height: 155% !important;
+        max-width: none !important;
+        max-height: none !important;
+        transform: scale(0.645);
+        transform-origin: center center;
     }
     .lightbox-footer-bar {
         flex-shrink: 0;
