@@ -556,19 +556,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------------------------------------
     // 5. Studio Configurator & Multi-Currency Calculator
     // ------------------------------------------------------------------------
-    const tabShorts = document.getElementById('tabCalcShorts');
-    const tabLong = document.getElementById('tabCalcLong');
-    const tabPodcast = document.getElementById('tabCalcPodcast');
+    const calcTabs = document.querySelectorAll('.config-tabs .tab-btn');
+    const panelShorts = document.getElementById('panel_shorts');
+    const panelLong = document.getElementById('panel_long');
+    const panelPodcast = document.getElementById('panel_podcast');
 
-    const optsShorts = document.getElementById('calcOptsShorts');
-    const optsLong = document.getElementById('calcOptsLong');
-    const optsPodcast = document.getElementById('calcOptsPodcast');
-
-    const durationRange = document.getElementById('durationRange');
-    const durationRangeVal = document.getElementById('durationRangeVal');
-    const btnQtyDec = document.getElementById('btnQtyDec');
-    const btnQtyInc = document.getElementById('btnQtyInc');
-    const calcQtyInput = document.getElementById('calcQtyInput');
+    const longSlider = document.getElementById('longDurationSlider');
+    const longSliderVal = document.getElementById('longDurationVal');
+    const btnQtyMinus = document.getElementById('qtyMinus');
+    const btnQtyPlus = document.getElementById('qtyPlus');
+    const qtyCountEl = document.getElementById('qtyCount');
+    const dealShortsBtn = document.getElementById('dealShortsBtn');
 
     const sumService = document.getElementById('sumService');
     const sumDuration = document.getElementById('sumDuration');
@@ -581,93 +579,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setCalcTab(tab) {
         calcState.tab = tab;
-        [tabShorts, tabLong, tabPodcast].forEach(t => t?.classList.remove('active'));
-        [optsShorts, optsLong, optsPodcast].forEach(o => {
-            if (o) o.style.display = 'none';
+        calcTabs.forEach(t => {
+            if (t.getAttribute('data-tab') === tab) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
         });
 
-        if (tab === 'shorts') {
-            tabShorts?.classList.add('active');
-            if (optsShorts) optsShorts.style.display = 'block';
-        } else if (tab === 'long') {
-            tabLong?.classList.add('active');
-            if (optsLong) optsLong.style.display = 'block';
-        } else if (tab === 'podcast') {
-            tabPodcast?.classList.add('active');
-            if (optsPodcast) optsPodcast.style.display = 'block';
-        }
+        if (panelShorts) panelShorts.style.display = tab === 'shorts' ? 'block' : 'none';
+        if (panelLong) panelLong.style.display = tab === 'long' ? 'block' : 'none';
+        if (panelPodcast) panelPodcast.style.display = tab === 'podcast' ? 'block' : 'none';
+
         updateCalculator();
     }
 
-    tabShorts?.addEventListener('click', () => setCalcTab('shorts'));
-    tabLong?.addEventListener('click', () => setCalcTab('long'));
-    tabPodcast?.addEventListener('click', () => setCalcTab('podcast'));
-
-    // Duration Chips
-    document.querySelectorAll('[data-calc-dur]').forEach(btn => {
+    calcTabs.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-calc-dur]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            calcState.reelDuration = parseInt(btn.getAttribute('data-calc-dur'), 10);
-            updateCalculator();
+            const tab = btn.getAttribute('data-tab');
+            if (tab) setCalcTab(tab);
         });
     });
 
-    // Motion Chips
-    document.querySelectorAll('[data-calc-motion]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-calc-motion]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            calcState.motionLevel = btn.getAttribute('data-calc-motion');
-            updateCalculator();
+    // Shorts Duration Radios
+    document.querySelectorAll('input[name="reelDuration"]').forEach(r => {
+        r.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                calcState.reelDuration = parseInt(e.target.value, 10);
+                updateCalculator();
+            }
+        });
+    });
+
+    // Long Video Motion Level Radios
+    document.querySelectorAll('input[name="motionLevel"]').forEach(r => {
+        r.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                calcState.motionLevel = e.target.value;
+                updateCalculator();
+            }
         });
     });
 
     // Long Minutes Slider
-    durationRange?.addEventListener('input', (e) => {
+    longSlider?.addEventListener('input', (e) => {
         calcState.longMinutes = parseInt(e.target.value, 10);
-        if (durationRangeVal) durationRangeVal.textContent = `${calcState.longMinutes} دقيقة`;
+        if (longSliderVal) {
+            longSliderVal.textContent = `${calcState.longMinutes} ${currentLang === 'ar' ? 'دقائق' : 'min'}`;
+        }
         updateCalculator();
     });
 
-    // Podcast Chips
-    document.querySelectorAll('[data-calc-podcast]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-calc-podcast]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            calcState.podcastMinutes = parseInt(btn.getAttribute('data-calc-podcast'), 10);
-            updateCalculator();
+    // Podcast Duration Radios
+    document.querySelectorAll('input[name="podDuration"]').forEach(r => {
+        r.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                calcState.podcastMinutes = parseInt(e.target.value, 10);
+                updateCalculator();
+            }
         });
     });
 
-    // Quantity controls
-    btnQtyDec?.addEventListener('click', () => {
+    // Quantity Stepper Controls
+    btnQtyMinus?.addEventListener('click', () => {
         if (calcState.quantity > 1) {
             calcState.quantity--;
-            if (calcQtyInput) calcQtyInput.value = calcState.quantity;
+            if (qtyCountEl) qtyCountEl.textContent = calcState.quantity;
             updateCalculator();
         }
     });
 
-    btnQtyInc?.addEventListener('click', () => {
+    btnQtyPlus?.addEventListener('click', () => {
         calcState.quantity++;
-        if (calcQtyInput) calcQtyInput.value = calcState.quantity;
+        if (qtyCountEl) qtyCountEl.textContent = calcState.quantity;
         updateCalculator();
     });
 
-    calcQtyInput?.addEventListener('change', (e) => {
-        const val = parseInt(e.target.value, 10);
-        calcState.quantity = isNaN(val) || val < 1 ? 1 : val;
-        calcQtyInput.value = calcState.quantity;
+    // Monthly Deal Banner Button (10 Shorts with 15% discount)
+    dealShortsBtn?.addEventListener('click', () => {
+        setCalcTab('shorts');
+        calcState.quantity = 10;
+        if (qtyCountEl) qtyCountEl.textContent = 10;
+        const r60 = document.querySelector('input[name="reelDuration"][value="60"]');
+        if (r60) {
+            r60.checked = true;
+            calcState.reelDuration = 60;
+        }
+        dealShortsBtn.classList.add('active');
+        setTimeout(() => dealShortsBtn.classList.remove('active'), 1200);
         updateCalculator();
     });
 
-    // Currency selector inside calculator
-    document.querySelectorAll('.calc-curr-btn').forEach(btn => {
+    // Multi-Currency Switcher inside Calculator
+    document.querySelectorAll('.currency-switcher .currency-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.calc-curr-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.currency-switcher .currency-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentCurrency = btn.getAttribute('data-curr');
+            currentCurrency = btn.getAttribute('data-curr') || 'USD';
             localStorage.setItem('site_currency', currentCurrency);
             updateCalculator();
             renderHomePreviews();

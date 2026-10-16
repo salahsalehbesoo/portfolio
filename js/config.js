@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
     CONFIG_VER: 'pro_portfolio_config_version'
 };
 
-const CONFIG_VERSION = "20261017_013500";
+const CONFIG_VERSION = "20261017_025500";
 
 // Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
 (function enforceConfigVersion() {
