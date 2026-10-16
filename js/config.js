@@ -3,7 +3,11 @@
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
- * Last updated: 2026-10-16T15:20:18.908Z
+ * Last updated: 2026-10-16T15:49:11.513Z
+ * Config Version: 20261016_184911
+ * 
+ * ⚠️ هذا الملف مولَّد تلقائيًا من لوحة التحكم — لا تعدّله يدويًا.
+ * جميع بياناتك مخبوزة مباشرة هنا وستظهر على كل الأجهزة بشكل موحّد.
  */
 
 const STORAGE_KEYS = {
@@ -17,8 +21,27 @@ const STORAGE_KEYS = {
     THEME: 'site_theme',
     LANG: 'site_lang',
     CURRENCY: 'site_currency',
-    MASTER_AUTH: 'pro_portfolio_master_auth'
+    MASTER_AUTH: 'pro_portfolio_master_auth',
+    CONFIG_VER: 'pro_portfolio_config_version'
 };
+
+const CONFIG_VERSION = "20261016_184911";
+
+// Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
+(function enforceConfigVersion() {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        const storedVer = localStorage.getItem(STORAGE_KEYS.CONFIG_VER);
+        if (storedVer !== CONFIG_VERSION) {
+            Object.values(STORAGE_KEYS).forEach(k => {
+                if (k !== STORAGE_KEYS.THEME && k !== STORAGE_KEYS.LANG && k !== STORAGE_KEYS.CURRENCY) {
+                    localStorage.removeItem(k);
+                }
+            });
+            localStorage.setItem(STORAGE_KEYS.CONFIG_VER, CONFIG_VERSION);
+        }
+    } catch (e) {}
+})();
 
 const DEFAULT_CONFIG = {
     "profile": {
@@ -176,7 +199,7 @@ const DEFAULT_CONFIG = {
     },
     "sections": {
         "store": false,
-        "tutorials": false,
+        "tutorials": true,
         "calculator": true,
         "reviews": true,
         "faq": true
@@ -203,23 +226,99 @@ const DEFAULT_CONFIG = {
 
 const DEFAULT_PROJECTS = [
     {
-        "id": "proj-1792163999743",
-        "titleAr": "بقثقب",
-        "titleEn": "بقثقب",
+        "id": "proj-1792165746746",
+        "titleAr": "xbdfvd",
+        "titleEn": "xbdfvd",
         "category": "shorts",
         "aspect": "vertical",
         "software": "DaVinci Resolve",
         "tag": "إعلاني",
         "views": "+250K",
         "retention": "80%",
-        "videoUrl": "https://drive.google.com/file/d/1jA3bW0DjDtFrg1zNs-uSwHfkbdz555Lz/preview",
-        "thumbnailUrl": "https://lh3.googleusercontent.com/d/1jA3bW0DjDtFrg1zNs-uSwHfkbdz555Lz=w800",
-        "descAr": "بقثقب",
-        "descEn": "بقثقب"
+        "videoUrl": "https://drive.google.com/file/d/1zPPFc8dZ2liaQj5PKxMbnKd6SZllfF4T/preview",
+        "thumbnailUrl": "https://lh3.googleusercontent.com/d/1zPPFc8dZ2liaQj5PKxMbnKd6SZllfF4T=w1200",
+        "descAr": "xbdfvd",
+        "descEn": "xbdfvd"
+    },
+    {
+        "id": "proj-1792075335693",
+        "titleAr": "ريل اعلاني لاكاديمية تداول",
+        "titleEn": "ريل اعلاني لاكاديمية تداول",
+        "category": "shorts",
+        "aspect": "vertical",
+        "software": "DaVinci Resolve",
+        "tag": "إعلاني",
+        "views": "+250K",
+        "retention": "80%",
+        "videoUrl": "https://drive.google.com/file/d/1tPqV24Ex5AuFqf3lToKWmzhwHsRco-5W/preview",
+        "thumbnailUrl": "https://lh3.googleusercontent.com/d/1tPqV24Ex5AuFqf3lToKWmzhwHsRco-5W=w1200",
+        "descAr": "ريل اعلاني لاكاديمية تداول",
+        "descEn": "ريل اعلاني لاكاديمية تداول"
     }
 ];
 
-const DEFAULT_TUTORIALS = [];
+const DEFAULT_TUTORIALS = [
+    {
+        "id": "tut-1",
+        "titleAr": "أسرار مونتاج الـ High Retention: كيف تجعل المشاهد يكمل الفيديو للنهاية؟",
+        "titleEn": "High-Retention Editing Secrets: Hooking Viewers to the Last Second",
+        "category": "retention",
+        "categoryNameAr": "استراتيجيات تفاعل",
+        "thumbnailUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80",
+        "coverImg": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80",
+        "readTime": "5 دقائق قراءة",
+        "date": "2026-10-10",
+        "views": 1420,
+        "summaryAr": "دليل عملي لكيفية بناء الـ Visual Pacing وتغيير المشاهد كل 2-3 ثوانٍ مع اختيار المؤثر الصوتي الأنسب بدون تشتيت المشاهد.",
+        "toc": [
+            {
+                "id": "sec-hook",
+                "title": "قاعدة أول 3 ثوانٍ (The Visual Hook)"
+            },
+            {
+                "id": "sec-pacing",
+                "title": "تناسق الـ Pacing البصري مع نبض الموسيقى"
+            },
+            {
+                "id": "sec-sound",
+                "title": "هندسة الصوت (Sound Design) نصف جودة الفيديو"
+            },
+            {
+                "id": "sec-summary",
+                "title": "الخلاصة والتطبيق العملي"
+            }
+        ],
+        "contentAr": "\n            <div id=\"sec-hook\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">1. قاعدة أول 3 ثوانٍ (The Visual Hook)</h3>\n                <p>لا تبدأ الفيديو بمقدمة طويلة أو ترحيب تقليدي. ابدأ فوراً بنتيجة الحدث، أو بسؤال صادم، أو بلقطة ديناميكية مع مؤثر صوتي حاد (Whoosh + Impact) لجذب انتباه الإبهام ومنعه من التمرير.</p>\n                <img src=\"https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80\" alt=\"Visual Hook\" style=\"width:100%; border-radius:14px; margin:1rem 0; border:1px solid var(--border-subtle);\">\n            </div>\n            \n            <div id=\"sec-pacing\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">2. تناسق الـ Pacing البصري مع نبض الموسيقى</h3>\n                <p>التقطيع العشوائي يربك العين؛ استخدم الـ Beat Drop لتغيير زوايا الكاميرا، وضع الـ B-Rolls عند كل فكرة جديدة لتوضيح المعنى بصرياً بدلاً من الاكتفاء بالحديث.</p>\n            </div>\n            \n            <div id=\"sec-sound\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">3. هندسة الصوت (Sound Design) نصف جودة الفيديو</h3>\n                <p>الساوند ديزاين هو ما يعطي الحياة لكل حركة: أصوات النقرات (Mouse clicks)، حركة الورق (Paper tear)، والتأثيرات المحيطية (Riser) قبل كل نقطة رئيسية.</p>\n            </div>\n\n            <div id=\"sec-summary\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">4. الخلاصة والتطبيق العملي</h3>\n                <p>احرص دائماً على اختبار الفيديوهات بحذف الصوت أولاً؛ إذا كان الفيديو مشوقاً بدون صوت، فهو جاهز لاكتساح خوارزميات ريلز وتيك توك.</p>\n            </div>\n        "
+    },
+    {
+        "id": "tut-2",
+        "titleAr": "الدليل الشامل لتصحيح الألوان (Color Grading) في DaVinci Resolve",
+        "titleEn": "Complete Cinematic Color Grading Guide in DaVinci Resolve",
+        "category": "color",
+        "categoryNameAr": "تلوين سينمائي",
+        "thumbnailUrl": "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=800&q=80",
+        "coverImg": "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80",
+        "readTime": "7 دقائق قراءة",
+        "date": "2026-10-08",
+        "views": 980,
+        "summaryAr": "شرح هيكل الـ Nodes الاحترافي، كيفية تحويل الـ Log إلى Rec.709، وضبط الـ Skin Tones بدقة ميكروسكوبية.",
+        "toc": [
+            {
+                "id": "sec-nodetree",
+                "title": "هيكلية الـ Node Tree الاحترافية"
+            },
+            {
+                "id": "sec-cst",
+                "title": "استخدام Color Space Transform (CST)"
+            },
+            {
+                "id": "sec-skintone",
+                "title": "ضبط لون البشرة (Skin Tones Vector)"
+            }
+        ],
+        "contentAr": "\n            <div id=\"sec-nodetree\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">1. هيكلية الـ Node Tree الاحترافية</h3>\n                <p>افصل دائماً بين مرحلة التصحيح الأولي (Color Correction) ومرحلة التدرج الإبداعي (Color Grading). ابدأ بـ Exposure، ثم Contrast، ثم Balance، ثم Skin Tones في عقدة منفصلة.</p>\n            </div>\n            \n            <div id=\"sec-cst\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">2. استخدام Color Space Transform (CST)</h3>\n                <p>تجنب استخدام LUTs تحويلية عشوائية؛ استخدم دائماً أداة CST المدمجة في دافينشي لتحويل كود الكاميرا (Sony S-Log3 أو Canon C-Log) إلى Rec.709 للحفاظ على كامل النطاق الديناميكي للضوء.</p>\n            </div>\n\n            <div id=\"sec-skintone\">\n                <h3 style=\"font-size:1.35rem; font-weight:800; color:var(--text-primary); margin:1.5rem 0 0.8rem 0;\">3. ضبط لون البشرة (Skin Tones Vector)</h3>\n                <p>استخدم الـ Vectorscope وتأكد من أن لون البشرة يقع بدقة على خط الـ Skin Tone Line بغض النظر عن عرق الشخص أو الإضاءة المحيطة.</p>\n            </div>\n        "
+    }
+];
 
 const DEFAULT_PRODUCTS = [
     {
