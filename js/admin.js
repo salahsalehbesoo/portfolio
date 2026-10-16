@@ -1090,28 +1090,50 @@ document.addEventListener('DOMContentLoaded', () => {
     bindFileUpload('newThumbFile', 'newThumbnail', 'newThumbFeedback');
 
     // ========================================================================
-    // Smart Video Thumbnail Studio Engine (Frame Grabber, Precision Steppers & Auto-Fetch)
+    // Dedicated Video Frame Picker Popup Modal Engine
     // ========================================================================
-    const videoScrubFileInput = document.getElementById('videoScrubFileInput');
-    const btnLoadVideoFromUrl = document.getElementById('btnLoadVideoFromUrl');
-    const btnAutoFetchYtDriveThumb = document.getElementById('btnAutoFetchYtDriveThumb');
-    const scrubVideoEl = document.getElementById('scrubVideoEl');
-    const videoScrubContainer = document.getElementById('videoScrubContainer');
-    const videoScrubSlider = document.getElementById('videoScrubSlider');
-    const scrubTimecodeBadge = document.getElementById('scrubTimecodeBadge');
-    const videoScrubTimeDisplay = document.getElementById('videoScrubTimeDisplay');
-    const videoScrubFeedback = document.getElementById('videoScrubFeedback');
-    const btnCaptureVideoFrame = document.getElementById('btnCaptureVideoFrame');
-    const btnTogglePlayPause = document.getElementById('btnTogglePlayPause');
-    const btnCenterPlayVideo = document.getElementById('btnCenterPlayVideo');
-    const iconPlayPause = document.getElementById('iconPlayPause');
+    const videoFramePickerModal = document.getElementById('videoFramePickerModal');
+    const videoPickerBackdrop = document.getElementById('videoPickerBackdrop');
+    const btnOpenFramePickerModal = document.getElementById('btnOpenFramePickerModal');
+    const btnFramePickerClose = document.getElementById('btnFramePickerClose');
+    const btnFramePickerCancel = document.getElementById('btnFramePickerCancel');
+
+    const modalVideoFileInput = document.getElementById('modalVideoFileInput');
+    const btnModalLoadFromUrl = document.getElementById('btnModalLoadFromUrl');
+    const modalVideoFeedback = document.getElementById('modalVideoFeedback');
+    const modalVideoSurroundBox = document.getElementById('modalVideoSurroundBox');
+    const modalVideoEmptyState = document.getElementById('modalVideoEmptyState');
+    const modalScrubVideoEl = document.getElementById('modalScrubVideoEl');
+    const modalDriveIframe = document.getElementById('modalDriveIframe');
+    const modalTimecodeBadge = document.getElementById('modalTimecodeBadge');
+
+    const modalIframeActionsPanel = document.getElementById('modalIframeActionsPanel');
+    const btnModalAutoFetchCdnCover = document.getElementById('btnModalAutoFetchCdnCover');
+    const btnModalPasteClipboard = document.getElementById('btnModalPasteClipboard');
+    const btnModalSwitchToLocal = document.getElementById('btnModalSwitchToLocal');
+
+    const modalScrubControlsArea = document.getElementById('modalScrubControlsArea');
+    const btnModalTogglePlay = document.getElementById('btnModalTogglePlay');
+    const iconModalPlayPause = document.getElementById('iconModalPlayPause');
+    const modalVideoSlider = document.getElementById('modalVideoSlider');
+    const modalTimeDisplay = document.getElementById('modalTimeDisplay');
+
+    const btnModalDownloadSnap = document.getElementById('btnModalDownloadSnap');
+    const btnModalApplyFrame = document.getElementById('btnModalApplyFrame');
+
     const capturedThumbPreviewCard = document.getElementById('capturedThumbPreviewCard');
     const capturedThumbImgPreview = document.getElementById('capturedThumbImgPreview');
     const capturedThumbMeta = document.getElementById('capturedThumbMeta');
+    const btnCropThumbVertical = document.getElementById('btnCropThumbVertical');
+    const btnCropThumbWide = document.getElementById('btnCropThumbWide');
     const btnDownloadCapturedThumb = document.getElementById('btnDownloadCapturedThumb');
     const btnClearCapturedThumb = document.getElementById('btnClearCapturedThumb');
 
-    let isUserDraggingSlider = false;
+    let isUserDraggingModalSlider = false;
+    let uncroppedSourceImage = '';
+    let currentActiveMode = 'none'; // 'local', 'iframe', 'none'
+    let currentDriveId = null;
+    let currentYtId = null;
 
     function formatTime(seconds) {
         if (!seconds || isNaN(seconds)) return '00:00.0';
@@ -1120,11 +1142,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins.toString().padStart(2, '0')}:${secs.padStart(4, '0')}`;
     }
 
-    function updateScrubTimeDisplay(seconds) {
+    function updateModalTimeDisplay(seconds) {
         const formatted = formatTime(seconds);
-        const durationFormatted = scrubVideoEl?.duration ? formatTime(scrubVideoEl.duration) : '00:00.0';
-        if (scrubTimecodeBadge) scrubTimecodeBadge.textContent = `${formatted} / ${durationFormatted}`;
-        if (videoScrubTimeDisplay) videoScrubTimeDisplay.textContent = formatted;
+        const durationFormatted = modalScrubVideoEl?.duration ? formatTime(modalScrubVideoEl.duration) : '00:00.0';
+        if (modalTimecodeBadge) modalTimecodeBadge.textContent = `${formatted} / ${durationFormatted}`;
+        if (modalTimeDisplay) modalTimeDisplay.textContent = formatted;
     }
 
     function extractYouTubeId(url) {
@@ -1136,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function extractDriveId(url) {
         if (!url) return null;
-        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
         return (match && match[1]) ? match[1] : null;
     }
 
@@ -1145,272 +1167,602 @@ document.addEventListener('DOMContentLoaded', () => {
             capturedThumbImgPreview.src = url;
             if (capturedThumbMeta) capturedThumbMeta.textContent = metaInfo || '';
             capturedThumbPreviewCard.style.display = 'block';
-            if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
         }
     }
 
-    // 1. Local Video File Input
-    if (videoScrubFileInput && !videoScrubFileInput.dataset.bound) {
-        videoScrubFileInput.dataset.bound = "true";
-        videoScrubFileInput.addEventListener('change', (e) => {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const blobUrl = URL.createObjectURL(file);
-            if (scrubVideoEl) {
-                scrubVideoEl.src = blobUrl;
-                if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
-                if (videoScrubFeedback) {
-                    videoScrubFeedback.style.display = 'inline-flex';
-                    videoScrubFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تحميل (${file.name.slice(0, 18)}...)`;
-                }
-                scrubVideoEl.onloadedmetadata = () => {
-                    if (videoScrubSlider) {
-                        videoScrubSlider.min = 0;
-                        videoScrubSlider.max = scrubVideoEl.duration || 10;
-                        videoScrubSlider.step = (scrubVideoEl.duration > 60) ? 0.08 : 0.03;
-                        videoScrubSlider.value = 0;
-                    }
-                    updateScrubTimeDisplay(0);
-                    scrubVideoEl.currentTime = 0;
-                };
-            }
-        });
+    function syncModalAspectBox(aspect) {
+        if (!modalVideoSurroundBox) return;
+        if (aspect === 'vertical') {
+            modalVideoSurroundBox.style.maxWidth = '340px';
+        } else if (aspect === 'widescreen') {
+            modalVideoSurroundBox.style.maxWidth = '580px';
+        } else {
+            modalVideoSurroundBox.style.maxWidth = '520px';
+        }
     }
 
-    // 2. Load Direct Video URL
-    if (btnLoadVideoFromUrl && !btnLoadVideoFromUrl.dataset.bound) {
-        btnLoadVideoFromUrl.dataset.bound = "true";
-        btnLoadVideoFromUrl.addEventListener('click', () => {
-            const urlInput = document.getElementById('newUrl');
-            const rawUrl = urlInput ? urlInput.value.trim() : '';
-            if (!rawUrl) {
-                alert('يرجى كتابة رابط الفيديو في حقل الرابط بالأعلى أولاً.');
-                urlInput?.focus();
-                return;
-            }
-
-            const ytId = extractYouTubeId(rawUrl);
-            const driveId = extractDriveId(rawUrl);
-
-            if (ytId || driveId) {
-                fetchAutoThumbFromUrl(rawUrl);
-                return;
-            }
-
-            if (scrubVideoEl) {
-                scrubVideoEl.src = rawUrl;
-                if (videoScrubContainer) videoScrubContainer.style.display = 'flex';
-                if (videoScrubFeedback) {
-                    videoScrubFeedback.style.display = 'inline-flex';
-                    videoScrubFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> جاري تشغيل الرابط المباشر`;
-                }
-                scrubVideoEl.onloadedmetadata = () => {
-                    if (videoScrubSlider) {
-                        videoScrubSlider.min = 0;
-                        videoScrubSlider.max = scrubVideoEl.duration || 10;
-                        videoScrubSlider.value = 0;
-                    }
-                    updateScrubTimeDisplay(0);
-                    scrubVideoEl.currentTime = 0;
-                };
-                scrubVideoEl.onerror = () => {
-                    alert('تعذر تشغيل هذا الرابط مباشرة في مشغل الفيديو (بسبب سياسات الأمان أو صيغة الملف). يرجى اختيار ملف الفيديو مباشرة من جهازك بالزر رقم 1.');
-                };
-            }
+    document.querySelectorAll('input[name="modalAspectMode"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            syncModalAspectBox(radio.value);
         });
+    });
+
+    // Handle Global Clipboard Paste (Win + Shift + S then Ctrl + V)
+    function handleGlobalPaste(e) {
+        if (!videoFramePickerModal || videoFramePickerModal.style.display === 'none') return;
+        if (!e.clipboardData || !e.clipboardData.items) return;
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type && items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                if (blob) {
+                    processPastedBlob(blob);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
     }
 
-    // 3. Auto-Fetch YouTube / Google Drive Thumbnail
-    function fetchAutoThumbFromUrl(rawUrl) {
-        const urlInput = document.getElementById('newUrl');
-        const url = rawUrl || (urlInput ? urlInput.value.trim() : '');
-        if (!url) {
-            alert('يرجى كتابة رابط الفيديو (يوتيوب أو جوجل درايف) في حقل الرابط بالأعلى أولاً.');
-            urlInput?.focus();
-            return;
+    function processPastedBlob(blob) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const mode = document.querySelector('input[name="modalAspectMode"]:checked')?.value || 'vertical';
+                const res = cropAndApplyImage(img, mode, 'لقطة شاشة (الحافظة)');
+                if (res) {
+                    closeFramePickerModal();
+                    showToast('تم لصق واقتصاص اللقطة بنجاح واعتمادها للمشروع! ✨');
+                }
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    // Modal Open/Close Controls
+    function openFramePickerModal() {
+        if (!videoFramePickerModal) return;
+        videoFramePickerModal.style.display = 'flex';
+        
+        const currentAspect = document.getElementById('newAspect')?.value || 'vertical';
+        const targetRadio = document.querySelector(`input[name="modalAspectMode"][value="${currentAspect}"]`);
+        if (targetRadio) {
+            targetRadio.checked = true;
+            syncModalAspectBox(currentAspect);
         }
 
-        const ytId = extractYouTubeId(url);
-        const driveId = extractDriveId(url);
-        const thumbInput = document.getElementById('newThumbnail');
-        const thumbFeedback = document.getElementById('newThumbFeedback');
+        window.addEventListener('paste', handleGlobalPaste);
+
+        // Auto-check newUrl input
+        const rawUrl = document.getElementById('newUrl')?.value?.trim() || '';
+        if (rawUrl && currentActiveMode === 'none') {
+            loadFromUrlString(rawUrl);
+        }
+    }
+
+    function closeFramePickerModal() {
+        if (!videoFramePickerModal) return;
+        if (modalScrubVideoEl && !modalScrubVideoEl.paused) {
+            modalScrubVideoEl.pause();
+        }
+        window.removeEventListener('paste', handleGlobalPaste);
+        videoFramePickerModal.style.display = 'none';
+    }
+
+    if (btnOpenFramePickerModal && !btnOpenFramePickerModal.dataset.bound) {
+        btnOpenFramePickerModal.dataset.bound = "true";
+        btnOpenFramePickerModal.addEventListener('click', openFramePickerModal);
+    }
+    if (btnFramePickerClose && !btnFramePickerClose.dataset.bound) {
+        btnFramePickerClose.dataset.bound = "true";
+        btnFramePickerClose.addEventListener('click', closeFramePickerModal);
+    }
+    if (btnFramePickerCancel && !btnFramePickerCancel.dataset.bound) {
+        btnFramePickerCancel.dataset.bound = "true";
+        btnFramePickerCancel.addEventListener('click', closeFramePickerModal);
+    }
+    if (videoPickerBackdrop && !videoPickerBackdrop.dataset.bound) {
+        videoPickerBackdrop.dataset.bound = "true";
+        videoPickerBackdrop.addEventListener('click', closeFramePickerModal);
+    }
+
+    // Load from URL (Google Drive / YouTube / Direct MP4)
+    function loadFromUrlString(rawUrl) {
+        if (!rawUrl) return false;
+        const driveId = extractDriveId(rawUrl);
+        const ytId = extractYouTubeId(rawUrl);
+
+        if (driveId) {
+            currentDriveId = driveId;
+            currentYtId = null;
+            currentActiveMode = 'iframe';
+
+            if (modalVideoEmptyState) modalVideoEmptyState.style.display = 'none';
+            if (modalScrubVideoEl) {
+                modalScrubVideoEl.pause();
+                modalScrubVideoEl.style.display = 'none';
+            }
+            if (modalScrubControlsArea) modalScrubControlsArea.style.display = 'none';
+            if (modalTimecodeBadge) modalTimecodeBadge.style.display = 'none';
+
+            if (modalDriveIframe) {
+                modalDriveIframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+                modalDriveIframe.style.display = 'block';
+            }
+            if (modalIframeActionsPanel) modalIframeActionsPanel.style.display = 'flex';
+
+            if (modalVideoFeedback) {
+                modalVideoFeedback.style.display = 'inline-flex';
+                modalVideoFeedback.innerHTML = `<i class="fa-brands fa-google-drive" style="color: #60a5fa;"></i> فيديو Google Drive جاهز للتشغيل 🎬`;
+            }
+            showToast('تم تشغيل مشغل Google Drive داخل النافذة! شاهد الفيديو واضغط زر الغلاف أو الصق لقطة الشاشة.');
+            return true;
+        }
 
         if (ytId) {
-            const ytThumb = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-            if (thumbInput) thumbInput.value = ytThumb;
-            if (thumbFeedback) {
-                thumbFeedback.style.display = 'inline-flex';
-                thumbFeedback.innerHTML = `<i class="fa-brands fa-youtube" style="color:#ef4444;"></i> تم جلب غلاف يوتيوب الرسمي HD`;
+            currentYtId = ytId;
+            currentDriveId = null;
+            currentActiveMode = 'iframe';
+
+            if (modalVideoEmptyState) modalVideoEmptyState.style.display = 'none';
+            if (modalScrubVideoEl) {
+                modalScrubVideoEl.pause();
+                modalScrubVideoEl.style.display = 'none';
             }
-            showCapturedPreview(ytThumb, 'YouTube HD Cover (1280 × 720) • تم تعيينه تلقائياً');
-            showToast('تم استخراج غلاف يوتيوب الأصلي فائق الدقة بنجاح!');
-        } else if (driveId) {
-            const driveThumb = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
-            if (thumbInput) thumbInput.value = driveThumb;
-            if (thumbFeedback) {
-                thumbFeedback.style.display = 'inline-flex';
-                thumbFeedback.innerHTML = `<i class="fa-brands fa-google-drive" style="color:#3b82f6;"></i> تم جلب غلاف جوجل درايف 4K`;
+            if (modalScrubControlsArea) modalScrubControlsArea.style.display = 'none';
+            if (modalTimecodeBadge) modalTimecodeBadge.style.display = 'none';
+
+            if (modalDriveIframe) {
+                modalDriveIframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+                modalDriveIframe.style.display = 'block';
             }
-            showCapturedPreview(driveThumb, 'Google Drive 4K Snapshot • تم تعيينه تلقائياً');
-            showToast('تم استخراج غلاف جوجل درايف فائق الجودة بنجاح!');
-        } else {
-            alert('الرابط ليس من يوتيوب أو جوجل درايف. إذا كان لديك ملف الفيديو على جهازك، استخدم الخيار 1 لتحديد أي لقطة تريدها.');
+            if (modalIframeActionsPanel) modalIframeActionsPanel.style.display = 'flex';
+
+            if (modalVideoFeedback) {
+                modalVideoFeedback.style.display = 'inline-flex';
+                modalVideoFeedback.innerHTML = `<i class="fa-brands fa-youtube" style="color: #ef4444;"></i> فيديو YouTube جاهز للتشغيل 🎬`;
+            }
+            showToast('تم تشغيل فيديو YouTube داخل النافذة! شاهد الفيديو واضغط زر الغلاف أو الصق لقطة الشاشة.');
+            return true;
+        }
+
+        if (rawUrl.match(/\.(mp4|mov|webm|avi)/i)) {
+            currentDriveId = null;
+            currentYtId = null;
+            currentActiveMode = 'local';
+
+            if (modalVideoEmptyState) modalVideoEmptyState.style.display = 'none';
+            if (modalDriveIframe) {
+                modalDriveIframe.src = 'about:blank';
+                modalDriveIframe.style.display = 'none';
+            }
+            if (modalIframeActionsPanel) modalIframeActionsPanel.style.display = 'none';
+
+            if (modalScrubVideoEl) {
+                modalScrubVideoEl.style.display = 'block';
+                modalScrubVideoEl.controls = true;
+                modalScrubVideoEl.crossOrigin = 'anonymous';
+                modalScrubVideoEl.src = rawUrl;
+                modalScrubVideoEl.load();
+                modalScrubVideoEl.play().catch(() => {});
+            }
+            if (modalScrubControlsArea) modalScrubControlsArea.style.display = 'flex';
+            if (modalTimecodeBadge) modalTimecodeBadge.style.display = 'inline-block';
+
+            if (modalVideoFeedback) {
+                modalVideoFeedback.style.display = 'inline-flex';
+                modalVideoFeedback.innerHTML = `<i class="fa-solid fa-play"></i> فيديو مباشر جاهز`;
+            }
+            showToast('جاري تشغيل رابط الفيديو المباشر...');
+            return true;
+        }
+
+        return false;
+    }
+
+    if (btnModalLoadFromUrl && !btnModalLoadFromUrl.dataset.bound) {
+        btnModalLoadFromUrl.dataset.bound = "true";
+        btnModalLoadFromUrl.addEventListener('click', () => {
+            const rawUrl = document.getElementById('newUrl')?.value?.trim() || '';
+            if (!rawUrl) {
+                alert('يرجى كتابة رابط الفيديو في حقل الرابط بصفحة إضافة المشروع أولاً.');
+                return;
+            }
+            const ok = loadFromUrlString(rawUrl);
+            if (!ok) {
+                alert('الرابط المكتوب ليس رابط فيديو مباشر أو Google Drive أو YouTube.\n\n💡 أفضل وأدق طريقة: اضغط الزر رقم (1) لاختيار ملف الفيديو من جهازك والتقليب فريم بـ فريم بدقة 60 إطار بدون أي قيود!');
+            }
+        });
+    }
+
+    // 1. Load Local Video File into Modal (Zero-Lag Local Stream with Native Controls)
+    function loadLocalVideoFileToModal(file) {
+        if (!file) return;
+        const blobUrl = URL.createObjectURL(file);
+        currentActiveMode = 'local';
+        currentDriveId = null;
+        currentYtId = null;
+
+        if (modalVideoEmptyState) modalVideoEmptyState.style.display = 'none';
+        if (modalDriveIframe) {
+            modalDriveIframe.src = 'about:blank';
+            modalDriveIframe.style.display = 'none';
+        }
+        if (modalIframeActionsPanel) modalIframeActionsPanel.style.display = 'none';
+
+        if (modalScrubVideoEl) {
+            modalScrubVideoEl.style.display = 'block';
+            modalScrubVideoEl.controls = true;
+            modalScrubVideoEl.muted = false;
+            modalScrubVideoEl.playsInline = true;
+            modalScrubVideoEl.preload = 'auto';
+            modalScrubVideoEl.src = blobUrl;
+            modalScrubVideoEl.load();
+
+            if (modalTimecodeBadge) modalTimecodeBadge.style.display = 'inline-block';
+            if (modalScrubControlsArea) modalScrubControlsArea.style.display = 'flex';
+
+            if (modalVideoFeedback) {
+                modalVideoFeedback.style.display = 'inline-flex';
+                modalVideoFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم فتح (${file.name.slice(0, 22)}) للتقليب فريم بـ فريم`;
+            }
+
+            modalScrubVideoEl.onloadedmetadata = () => {
+                if (modalVideoSlider) {
+                    modalVideoSlider.min = 0;
+                    modalVideoSlider.max = modalScrubVideoEl.duration || 10;
+                    modalVideoSlider.step = (modalScrubVideoEl.duration > 60) ? 0.08 : 0.03;
+                    modalVideoSlider.value = 0;
+                }
+                updateModalTimeDisplay(0);
+                try { modalScrubVideoEl.currentTime = 0.05; } catch (e) {}
+
+                if (modalScrubVideoEl.videoWidth && modalScrubVideoEl.videoHeight) {
+                    const isVert = modalScrubVideoEl.videoHeight > modalScrubVideoEl.videoWidth;
+                    const aspectVal = isVert ? 'vertical' : 'widescreen';
+                    const targetRadio = document.querySelector(`input[name="modalAspectMode"][value="${aspectVal}"]`);
+                    if (targetRadio) targetRadio.checked = true;
+                    syncModalAspectBox(aspectVal);
+                }
+            };
+            showToast('تم فتح الفيديو! يمكنك تشغيله وتقليب الفريمات ثم اعتماد اللقطة.');
         }
     }
 
-    if (btnAutoFetchYtDriveThumb && !btnAutoFetchYtDriveThumb.dataset.bound) {
-        btnAutoFetchYtDriveThumb.dataset.bound = "true";
-        btnAutoFetchYtDriveThumb.addEventListener('click', () => fetchAutoThumbFromUrl());
+    if (modalVideoFileInput && !modalVideoFileInput.dataset.bound) {
+        modalVideoFileInput.dataset.bound = "true";
+        modalVideoFileInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            loadLocalVideoFileToModal(file);
+        });
     }
 
-    // Video Play/Pause & Center Play Button
-    function toggleVideoPlay() {
-        if (!scrubVideoEl) return;
-        if (scrubVideoEl.paused) {
-            scrubVideoEl.play().catch(() => {});
+    if (btnModalSwitchToLocal && !btnModalSwitchToLocal.dataset.bound) {
+        btnModalSwitchToLocal.dataset.bound = "true";
+        btnModalSwitchToLocal.addEventListener('click', () => {
+            modalVideoFileInput?.click();
+        });
+    }
+
+    // Video Play/Pause & Slider Sync
+    function toggleModalVideoPlay() {
+        if (!modalScrubVideoEl) return;
+        if (modalScrubVideoEl.paused) {
+            modalScrubVideoEl.play().catch(() => {});
         } else {
-            scrubVideoEl.pause();
+            modalScrubVideoEl.pause();
         }
     }
 
-    if (btnTogglePlayPause && !btnTogglePlayPause.dataset.bound) {
-        btnTogglePlayPause.dataset.bound = "true";
-        btnTogglePlayPause.addEventListener('click', toggleVideoPlay);
+    if (btnModalTogglePlay && !btnModalTogglePlay.dataset.bound) {
+        btnModalTogglePlay.dataset.bound = "true";
+        btnModalTogglePlay.addEventListener('click', toggleModalVideoPlay);
     }
-    if (btnCenterPlayVideo && !btnCenterPlayVideo.dataset.bound) {
-        btnCenterPlayVideo.dataset.bound = "true";
-        btnCenterPlayVideo.addEventListener('click', toggleVideoPlay);
-    }
-    if (scrubVideoEl && !scrubVideoEl.dataset.bound) {
-        scrubVideoEl.dataset.bound = "true";
-        scrubVideoEl.addEventListener('click', toggleVideoPlay);
-        scrubVideoEl.addEventListener('play', () => {
-            if (iconPlayPause) iconPlayPause.className = 'fa-solid fa-pause';
-            if (btnCenterPlayVideo) btnCenterPlayVideo.style.display = 'none';
+    if (modalScrubVideoEl && !modalScrubVideoEl.dataset.bound) {
+        modalScrubVideoEl.dataset.bound = "true";
+        modalScrubVideoEl.addEventListener('play', () => {
+            if (iconModalPlayPause) iconModalPlayPause.className = 'fa-solid fa-pause';
         });
-        scrubVideoEl.addEventListener('pause', () => {
-            if (iconPlayPause) iconPlayPause.className = 'fa-solid fa-play';
-            if (btnCenterPlayVideo) btnCenterPlayVideo.style.display = 'flex';
+        modalScrubVideoEl.addEventListener('pause', () => {
+            if (iconModalPlayPause) iconModalPlayPause.className = 'fa-solid fa-play';
         });
-        scrubVideoEl.addEventListener('timeupdate', () => {
-            if (!isUserDraggingSlider && videoScrubSlider) {
-                videoScrubSlider.value = scrubVideoEl.currentTime;
+        modalScrubVideoEl.addEventListener('timeupdate', () => {
+            if (!isUserDraggingModalSlider && modalVideoSlider) {
+                modalVideoSlider.value = modalScrubVideoEl.currentTime;
             }
-            updateScrubTimeDisplay(scrubVideoEl.currentTime);
+            updateModalTimeDisplay(modalScrubVideoEl.currentTime);
         });
     }
 
     // Timeline Slider Dragging
-    if (videoScrubSlider && !videoScrubSlider.dataset.bound) {
-        videoScrubSlider.dataset.bound = "true";
-        videoScrubSlider.addEventListener('mousedown', () => { isUserDraggingSlider = true; });
-        videoScrubSlider.addEventListener('touchstart', () => { isUserDraggingSlider = true; }, { passive: true });
-        videoScrubSlider.addEventListener('input', () => {
-            const t = parseFloat(videoScrubSlider.value);
-            if (scrubVideoEl) scrubVideoEl.currentTime = t;
-            updateScrubTimeDisplay(t);
+    if (modalVideoSlider && !modalVideoSlider.dataset.bound) {
+        modalVideoSlider.dataset.bound = "true";
+        modalVideoSlider.addEventListener('mousedown', () => { isUserDraggingModalSlider = true; });
+        modalVideoSlider.addEventListener('touchstart', () => { isUserDraggingModalSlider = true; }, { passive: true });
+        modalVideoSlider.addEventListener('input', () => {
+            const t = parseFloat(modalVideoSlider.value);
+            if (modalScrubVideoEl) modalScrubVideoEl.currentTime = t;
+            updateModalTimeDisplay(t);
         });
-        videoScrubSlider.addEventListener('mouseup', () => { isUserDraggingSlider = false; });
-        videoScrubSlider.addEventListener('touchend', () => { isUserDraggingSlider = false; });
+        modalVideoSlider.addEventListener('mouseup', () => { isUserDraggingModalSlider = false; });
+        modalVideoSlider.addEventListener('touchend', () => { isUserDraggingModalSlider = false; });
     }
 
     // Precision Stepper Buttons
-    function stepVideoTime(delta) {
-        if (!scrubVideoEl || isNaN(scrubVideoEl.duration)) return;
-        scrubVideoEl.pause();
-        const newTime = Math.max(0, Math.min(scrubVideoEl.duration, scrubVideoEl.currentTime + delta));
-        scrubVideoEl.currentTime = newTime;
-        if (videoScrubSlider) videoScrubSlider.value = newTime;
-        updateScrubTimeDisplay(newTime);
+    function stepModalVideoTime(delta) {
+        if (!modalScrubVideoEl || isNaN(modalScrubVideoEl.duration)) return;
+        modalScrubVideoEl.pause();
+        const newTime = Math.max(0, Math.min(modalScrubVideoEl.duration, modalScrubVideoEl.currentTime + delta));
+        modalScrubVideoEl.currentTime = newTime;
+        if (modalVideoSlider) modalVideoSlider.value = newTime;
+        updateModalTimeDisplay(newTime);
     }
 
-    document.getElementById('btnStepBack5')?.addEventListener('click', () => stepVideoTime(-5));
-    document.getElementById('btnStepBack1')?.addEventListener('click', () => stepVideoTime(-1));
-    document.getElementById('btnStepBackFrame')?.addEventListener('click', () => stepVideoTime(-0.05));
-    document.getElementById('btnStepForwardFrame')?.addEventListener('click', () => stepVideoTime(0.05));
-    document.getElementById('btnStepForward1')?.addEventListener('click', () => stepVideoTime(1));
-    document.getElementById('btnStepForward5')?.addEventListener('click', () => stepVideoTime(5));
+    document.getElementById('btnModalStepBack5')?.addEventListener('click', () => stepModalVideoTime(-5));
+    document.getElementById('btnModalStepBack1')?.addEventListener('click', () => stepModalVideoTime(-1));
+    document.getElementById('btnModalStepBackFrame')?.addEventListener('click', () => stepModalVideoTime(-0.04));
+    document.getElementById('btnModalStepForwardFrame')?.addEventListener('click', () => stepModalVideoTime(0.04));
+    document.getElementById('btnModalStepForward1')?.addEventListener('click', () => stepModalVideoTime(1));
+    document.getElementById('btnModalStepForward5')?.addEventListener('click', () => stepModalVideoTime(5));
 
-    // Frame Capture with Custom Aspect Ratio Cropping
-    if (btnCaptureVideoFrame && !btnCaptureVideoFrame.dataset.bound) {
-        btnCaptureVideoFrame.dataset.bound = "true";
-        btnCaptureVideoFrame.addEventListener('click', () => {
-            if (!scrubVideoEl || !scrubVideoEl.videoWidth) {
-                alert('يرجى اختيار أو تشغيل فيديو أولاً لتمرير اللقطات والتقاط الغلاف.');
+    // Unified Crop & Apply Canvas Engine
+    function cropAndApplyImage(imgSource, targetMode, timeInfo = '') {
+        const c = document.createElement('canvas');
+        const ctx = c.getContext('2d');
+        const iw = imgSource.naturalWidth || imgSource.videoWidth || imgSource.width;
+        const ih = imgSource.naturalHeight || imgSource.videoHeight || imgSource.height;
+        if (!iw || !ih) return null;
+
+        let cropW = iw, cropH = ih, startX = 0, startY = 0;
+        if (targetMode === 'vertical') {
+            const targetRatio = 9 / 16;
+            if (iw / ih > targetRatio) {
+                cropW = ih * targetRatio;
+                startX = (iw - cropW) / 2;
+            } else {
+                cropH = iw / targetRatio;
+                startY = (ih - cropH) / 2;
+            }
+            c.width = Math.round(cropW);
+            c.height = Math.round(cropH);
+            ctx.drawImage(imgSource, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
+        } else if (targetMode === 'widescreen') {
+            const targetRatio = 16 / 9;
+            if (iw / ih > targetRatio) {
+                cropW = ih * targetRatio;
+                startX = (iw - cropW) / 2;
+            } else {
+                cropH = iw / targetRatio;
+                startY = (ih - cropH) / 2;
+            }
+            c.width = Math.round(cropW);
+            c.height = Math.round(cropH);
+            ctx.drawImage(imgSource, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
+        } else {
+            c.width = iw;
+            c.height = ih;
+            ctx.drawImage(imgSource, 0, 0, c.width, c.height);
+        }
+
+        const dataUrl = c.toDataURL('image/jpeg', 0.92);
+        uncroppedSourceImage = dataUrl;
+
+        const thumbInput = document.getElementById('newThumbnail');
+        const thumbFeedback = document.getElementById('newThumbFeedback');
+        if (thumbInput) thumbInput.value = dataUrl;
+        if (thumbFeedback) {
+            thumbFeedback.style.display = 'inline-flex';
+            thumbFeedback.innerHTML = `<i class="fa-solid fa-camera"></i> تم التقاط لقطة الثمبنيل (${c.width} × ${c.height} px) 📸`;
+        }
+
+        const modeLabel = targetMode === 'vertical' ? 'طولي (9:16 Reels)' : (targetMode === 'widescreen' ? 'عرضي (16:9 HD)' : 'أبعاد أصلية');
+        const timePart = timeInfo ? ` • ${timeInfo}` : '';
+        showCapturedPreview(dataUrl, `الأبعاد: ${c.width} × ${c.height} px • المقاس: ${modeLabel}${timePart}`);
+
+        const aspectSel = document.getElementById('newAspect');
+        if (aspectSel) {
+            if (targetMode === 'vertical') aspectSel.value = 'vertical';
+            else if (targetMode === 'widescreen') aspectSel.value = 'widescreen';
+            else if (c.width && c.height) {
+                aspectSel.value = (c.height > c.width) ? 'vertical' : 'widescreen';
+            }
+        }
+
+        return { dataUrl, width: c.width, height: c.height };
+    }
+
+    // Auto-Fetch 4K CDN Cover (Google Drive / YouTube)
+    function fetchAndCropRemoteImage(imgUrl, label) {
+        showToast(`جاري استخراج وقص غلاف ${label}...`);
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            const mode = document.querySelector('input[name="modalAspectMode"]:checked')?.value || 'vertical';
+            const res = cropAndApplyImage(img, mode, label);
+            if (res) {
+                closeFramePickerModal();
+                showToast(`تم استخراج وتطبيق غلاف ${label} بنجاح! ✨`);
+            }
+        };
+        img.onerror = () => {
+            const thumbInput = document.getElementById('newThumbnail');
+            if (thumbInput) thumbInput.value = imgUrl;
+            showCapturedPreview(imgUrl, `${label} (Original Cover)`);
+            closeFramePickerModal();
+            showToast(`تم تعيين غلاف ${label} للمشروع بنجاح!`);
+        };
+        img.src = imgUrl;
+    }
+
+    if (btnModalAutoFetchCdnCover && !btnModalAutoFetchCdnCover.dataset.bound) {
+        btnModalAutoFetchCdnCover.dataset.bound = "true";
+        btnModalAutoFetchCdnCover.addEventListener('click', () => {
+            const rawUrl = document.getElementById('newUrl')?.value?.trim() || '';
+            const driveId = extractDriveId(rawUrl) || currentDriveId;
+            const ytId = extractYouTubeId(rawUrl) || currentYtId;
+
+            if (driveId) {
+                const driveThumb = `https://lh3.googleusercontent.com/d/${driveId}=w1600`;
+                fetchAndCropRemoteImage(driveThumb, 'Google Drive 4K');
                 return;
             }
-
-            scrubVideoEl.pause();
-            const vw = scrubVideoEl.videoWidth;
-            const vh = scrubVideoEl.videoHeight;
-            const mode = document.querySelector('input[name="scrubAspectMode"]:checked')?.value || 'original';
-
-            const c = document.createElement('canvas');
-            const ctx = c.getContext('2d');
-
-            if (mode === 'vertical') {
-                // Target 9:16 vertical crop
-                const targetRatio = 9 / 16;
-                let cropW = vw;
-                let cropH = vh;
-                let startX = 0;
-                let startY = 0;
-
-                if (vw / vh > targetRatio) {
-                    cropW = vh * targetRatio;
-                    startX = (vw - cropW) / 2;
-                } else {
-                    cropH = vw / targetRatio;
-                    startY = (vh - cropH) / 2;
-                }
-                c.width = Math.round(cropW);
-                c.height = Math.round(cropH);
-                ctx.drawImage(scrubVideoEl, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
-            } else if (mode === 'widescreen') {
-                // Target 16:9 widescreen crop
-                const targetRatio = 16 / 9;
-                let cropW = vw;
-                let cropH = vh;
-                let startX = 0;
-                let startY = 0;
-
-                if (vw / vh > targetRatio) {
-                    cropW = vh * targetRatio;
-                    startX = (vw - cropW) / 2;
-                } else {
-                    cropH = vw / targetRatio;
-                    startY = (vh - cropH) / 2;
-                }
-                c.width = Math.round(cropW);
-                c.height = Math.round(cropH);
-                ctx.drawImage(scrubVideoEl, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
-            } else {
-                // Original resolution
-                c.width = vw;
-                c.height = vh;
-                ctx.drawImage(scrubVideoEl, 0, 0, c.width, c.height);
+            if (ytId) {
+                const primaryThumb = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+                fetchAndCropRemoteImage(primaryThumb, 'YouTube HD');
+                return;
             }
-
-            const frameBase64 = c.toDataURL('image/jpeg', 0.92);
-
-            // Set to Thumbnail Input
-            const thumbInput = document.getElementById('newThumbnail');
-            const thumbFeedback = document.getElementById('newThumbFeedback');
-            if (thumbInput) thumbInput.value = frameBase64;
-            if (thumbFeedback) {
-                thumbFeedback.style.display = 'inline-flex';
-                thumbFeedback.innerHTML = `<i class="fa-solid fa-camera"></i> تم التقاط لقطة الثمبنيل (${c.width} × ${c.height} px) 📸`;
-            }
-
-            // Display Live Captured Preview Card
-            const modeLabel = mode === 'vertical' ? 'طولي (9:16 Reels)' : (mode === 'widescreen' ? 'عرضي (16:9 HD)' : 'أبعاد الفيديو الأصلية');
-            showCapturedPreview(frameBase64, `الأبعاد: ${c.width} × ${c.height} px • التوقيت: ${formatTime(scrubVideoEl.currentTime)} • المقاس: ${modeLabel}`);
-
-            showToast('تم التقاط لقطة الثمبنيل من الفيديو بنجاح وتعيينها للمشروع!');
+            alert('يرجى التأكد من كتابة رابط فيديو صحيح (Google Drive أو YouTube).');
         });
     }
 
-    // Download Captured Image to PC
+    // Paste from Clipboard Button
+    if (btnModalPasteClipboard && !btnModalPasteClipboard.dataset.bound) {
+        btnModalPasteClipboard.dataset.bound = "true";
+        btnModalPasteClipboard.addEventListener('click', async () => {
+            try {
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    const clipboardItems = await navigator.clipboard.read();
+                    for (const item of clipboardItems) {
+                        for (const type of item.types) {
+                            if (type.startsWith('image/')) {
+                                const blob = await item.getType(type);
+                                processPastedBlob(blob);
+                                return;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Clipboard API read error:', err);
+            }
+            alert('💡 لالتقاط اللقطة من الحافظة:\n1. اضغط Win + Shift + S لقص الفريم المطلوب.\n2. ثم اضغط مباشرة من الكيبورد اختصار Ctrl + V وسيتم لصقها واعتمادها فوراً!');
+        });
+    }
+
+    // Download Snap Button (Downloads directly to PC)
+    if (btnModalDownloadSnap && !btnModalDownloadSnap.dataset.bound) {
+        btnModalDownloadSnap.dataset.bound = "true";
+        btnModalDownloadSnap.addEventListener('click', () => {
+            const mode = document.querySelector('input[name="modalAspectMode"]:checked')?.value || 'original';
+            
+            if (modalScrubVideoEl && modalScrubVideoEl.style.display !== 'none' && modalScrubVideoEl.videoWidth > 0) {
+                modalScrubVideoEl.pause();
+                const res = cropAndApplyImage(modalScrubVideoEl, mode, formatTime(modalScrubVideoEl.currentTime));
+                if (res && res.dataUrl) {
+                    const a = document.createElement('a');
+                    a.href = res.dataUrl;
+                    a.download = `video-frame-${Date.now()}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showToast('تم تحميل وحفظ صورة الفريم على جهازك بنجاح! 💾');
+                }
+                return;
+            }
+
+            if (uncroppedSourceImage) {
+                const a = document.createElement('a');
+                a.href = uncroppedSourceImage;
+                a.download = `video-thumbnail-${Date.now()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('تم حفظ الصورة على جهازك بنجاح! 💾');
+                return;
+            }
+
+            alert('يرجى فتح ملف فيديو من جهازك أولاً لتمرير اللقطات وتنزيل الفريم كصورة.');
+        });
+    }
+
+    // Modal Apply Frame Button (Applies to Form and Closes Modal)
+    if (btnModalApplyFrame && !btnModalApplyFrame.dataset.bound) {
+        btnModalApplyFrame.dataset.bound = "true";
+        btnModalApplyFrame.addEventListener('click', () => {
+            const mode = document.querySelector('input[name="modalAspectMode"]:checked')?.value || 'original';
+
+            // Case 1: Active local or direct HTML5 video
+            if (modalScrubVideoEl && modalScrubVideoEl.style.display !== 'none' && modalScrubVideoEl.videoWidth > 0) {
+                modalScrubVideoEl.pause();
+                const res = cropAndApplyImage(modalScrubVideoEl, mode, `التوقيت: ${formatTime(modalScrubVideoEl.currentTime)}`);
+                if (res) {
+                    closeFramePickerModal();
+                    showToast('تم التقاط لقطة الثمبنيل من الفيديو بنجاح! ✨');
+                }
+                return;
+            }
+
+            // Case 2: Active Google Drive or YouTube iframe
+            if (modalDriveIframe && modalDriveIframe.style.display !== 'none') {
+                btnModalAutoFetchCdnCover?.click();
+                return;
+            }
+
+            alert('يرجى تشغيل فيديو من الرابط أو فتح ملف فيديو من جهازك أولاً (الزر 1 أو 2) لتحديد الفريم المطلوب.');
+        });
+    }
+
+    // Re-cropping buttons on the form card (Lossless from uncroppedSourceImage)
+    function cropCapturedImage(targetAspect, label) {
+        if (!capturedThumbImgPreview || !capturedThumbImgPreview.src) return;
+        const currentSrc = uncroppedSourceImage || capturedThumbImgPreview.src;
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            try {
+                const c = document.createElement('canvas');
+                const ctx = c.getContext('2d');
+                const iw = img.naturalWidth || img.width;
+                const ih = img.naturalHeight || img.height;
+
+                const targetRatio = (targetAspect === 'vertical') ? (9 / 16) : (16 / 9);
+                let cropW = iw, cropH = ih, startX = 0, startY = 0;
+
+                if (iw / ih > targetRatio) {
+                    cropW = ih * targetRatio;
+                    startX = (iw - cropW) / 2;
+                } else {
+                    cropH = iw / targetRatio;
+                    startY = (ih - cropH) / 2;
+                }
+
+                c.width = Math.round(cropW);
+                c.height = Math.round(cropH);
+                ctx.drawImage(img, startX, startY, cropW, cropH, 0, 0, c.width, c.height);
+
+                const croppedData = c.toDataURL('image/jpeg', 0.92);
+                capturedThumbImgPreview.src = croppedData;
+                const thumbInput = document.getElementById('newThumbnail');
+                if (thumbInput) thumbInput.value = croppedData;
+                if (capturedThumbMeta) {
+                    capturedThumbMeta.textContent = `الأبعاد: ${c.width} × ${c.height} px • المقاس المقصوص: ${label}`;
+                }
+                const aspectSel = document.getElementById('newAspect');
+                if (aspectSel) aspectSel.value = targetAspect;
+                showToast(`تم قص وتنسيق الغلاف بمقاس ${label} بنجاح!`);
+            } catch (err) {
+                console.warn('Crop canvas error:', err);
+                alert('تعذر قص هذه الصورة تلقائياً.');
+            }
+        };
+        img.onerror = () => {
+            alert('تعذر تحميل الصورة لقصها.');
+        };
+        img.src = currentSrc;
+    }
+
+    if (btnCropThumbVertical && !btnCropThumbVertical.dataset.bound) {
+        btnCropThumbVertical.dataset.bound = "true";
+        btnCropThumbVertical.addEventListener('click', () => cropCapturedImage('vertical', 'ريلز (9:16)'));
+    }
+    if (btnCropThumbWide && !btnCropThumbWide.dataset.bound) {
+        btnCropThumbWide.dataset.bound = "true";
+        btnCropThumbWide.addEventListener('click', () => cropCapturedImage('widescreen', 'عريض (16:9)'));
+    }
+
+    // Download Captured Image button on form card
     if (btnDownloadCapturedThumb && !btnDownloadCapturedThumb.dataset.bound) {
         btnDownloadCapturedThumb.dataset.bound = "true";
         btnDownloadCapturedThumb.addEventListener('click', () => {
@@ -1425,10 +1777,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Clear Captured Image
+    // Clear Captured Image on form card
     if (btnClearCapturedThumb && !btnClearCapturedThumb.dataset.bound) {
         btnClearCapturedThumb.dataset.bound = "true";
         btnClearCapturedThumb.addEventListener('click', () => {
+            uncroppedSourceImage = '';
+            modalExternalImgObj = null;
             if (capturedThumbPreviewCard) capturedThumbPreviewCard.style.display = 'none';
             const thumbInput = document.getElementById('newThumbnail');
             const thumbFeedback = document.getElementById('newThumbFeedback');
@@ -1509,8 +1863,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (iconSubmit) iconSubmit.className = 'fa-solid fa-check';
                 if (btnCancel) btnCancel.style.display = 'inline-flex';
 
+                // Auto-load project video into scrubber studio
+                if (proj.videoUrl) {
+                    const driveId = extractDriveId(proj.videoUrl);
+                    if (driveId) {
+                        playDrivePreviewInStudio(driveId);
+                    } else if (proj.videoUrl.match(/\.(mp4|webm|mov)$/i)) {
+                        loadStreamVideoUrl(proj.videoUrl, 'فيديو مباشر');
+                    }
+                }
+                if (proj.thumbnailUrl) {
+                    showCapturedPreview(proj.thumbnailUrl, 'الغلاف الحالي للمشروع');
+                }
+
                 addProjectForm?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                showToast('تم تحميل بيانات الفيديو في النموذج للتعديل!');
+                showToast('تم تحميل بيانات الفيديو في المشغل والنموذج للتعديل!');
             });
         });
 
@@ -2778,15 +3145,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------------------------------------
     // 14. GitHub Pages Deployment & Code Exporter Module (Commercial 2026)
     // ------------------------------------------------------------------------
-    function generateConfigJsSource() {
+    function generateConfigJsSource(explicitVersion) {
         const cfg = getSiteConfig();
         const projs = getSiteProjects();
         const tuts = getSiteTutorials();
         const prods = getSiteProducts();
 
-        // Generate a unique version stamp based on export time
+        // Generate a unique version stamp based on export time (including seconds)
         const now = new Date();
-        const versionStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+        const versionStamp = explicitVersion || `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
 
         return `/**
  * ============================================================================
@@ -3430,26 +3797,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadGhSettings() {
         try {
             const raw = localStorage.getItem('pro_portfolio_gh_settings');
+            let gh = { username: 'salahsalehbesoo', repo: 'portfolio', branch: 'main', token: '' };
             if (raw) {
-                const gh = JSON.parse(raw);
-                const u = document.getElementById('ghUsername');
-                const r = document.getElementById('ghRepoName');
-                const b = document.getElementById('ghBranch');
-                const t = document.getElementById('ghToken');
-                if (u && gh.username) u.value = gh.username;
-                if (r && gh.repo) r.value = gh.repo;
-                if (b && gh.branch) b.value = gh.branch;
-                if (t && gh.token) t.value = gh.token;
+                const parsed = JSON.parse(raw);
+                gh = { ...gh, ...parsed };
             }
-        } catch (e) {}
+            const u = document.getElementById('ghUsername');
+            const r = document.getElementById('ghRepoName');
+            const b = document.getElementById('ghBranch');
+            const t = document.getElementById('ghToken');
+            if (u && gh.username && !u.value) u.value = gh.username;
+            if (r && gh.repo && !r.value) r.value = gh.repo;
+            if (b && gh.branch && !b.value) b.value = gh.branch;
+            if (t && gh.token && !t.value) t.value = gh.token;
+            return gh;
+        } catch (e) {
+            return { username: 'salahsalehbesoo', repo: 'portfolio', branch: 'main', token: '' };
+        }
     }
 
-    async function publishToGitHub() {
-        let username = document.getElementById('ghUsername')?.value.trim() || '';
-        let repo = document.getElementById('ghRepoName')?.value.trim() || '';
-        const branch = document.getElementById('ghBranch')?.value.trim() || 'main';
-        let token = document.getElementById('ghToken')?.value.trim().replace(/^['"]|['"]$/g, '') || '';
-        const feedback = document.getElementById('ghPublishFeedback');
+    async function publishToGitHub(targetFeedback) {
+        let savedGh = loadGhSettings();
+        let username = document.getElementById('ghUsername')?.value.trim() || savedGh.username || 'salahsalehbesoo';
+        let repo = document.getElementById('ghRepoName')?.value.trim() || savedGh.repo || 'portfolio';
+        const branch = document.getElementById('ghBranch')?.value.trim() || savedGh.branch || 'main';
+        let token = document.getElementById('ghToken')?.value.trim().replace(/^['"]|['"]$/g, '') || savedGh.token || '';
+        const feedback = targetFeedback || document.getElementById('ghPublishFeedback');
 
         // Auto-cleanup repository and username if full URL was pasted
         if (repo.startsWith('http://') || repo.startsWith('https://')) {
@@ -3476,14 +3849,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('ghRepoName') && repo) document.getElementById('ghRepoName').value = repo;
         if (document.getElementById('ghToken') && token) document.getElementById('ghToken').value = token;
 
-        if (!username || !repo || !token) {
+        if (!token) {
             if (feedback) {
                 feedback.style.display = 'block';
                 feedback.style.background = 'rgba(239, 68, 68, 0.15)';
                 feedback.style.border = '1px solid var(--admin-crimson)';
                 feedback.style.color = '#ef4444';
-                feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> يرجى إدخال اسم المستخدم والمستودع ورمز Token الخاص بـ GitHub.';
+                feedback.innerHTML = `
+                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>رمز التوكن (GitHub Token) غير متوفر:</strong>
+                    <br>
+                    يرجى فتح تبويب <a href="javascript:void(0)" onclick="document.querySelector('[data-tab=\\'tabDeploy\\'] button')?.click()" style="color:#60a5fa; font-weight:700; text-decoration:underline;">النشر وتصدير الكود</a> ولصق رمز الـ Token الخاص بك وحفظه مرة واحدة، ليتمكن هذا الزر من حفظ ونشر أي قسم فورياً بضغطة واحدة.
+                `;
             }
+            showToast('⚠️ يرجى حفظ رمز GitHub Token في تبويب النشر أولاً');
             return;
         }
 
@@ -3512,17 +3890,18 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.style.background = 'rgba(99, 102, 241, 0.15)';
             feedback.style.border = '1px solid #6366f1';
             feedback.style.color = '#818cf8';
-            feedback.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاتصال بـ GitHub ونشر التحديثات لملف js/config.js...';
+            feedback.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاتصال بـ GitHub ونشر التحديثات لملفات الموقع ومسح الكاش...';
         }
 
         try {
             const cleanRepo = `${username}/${repo}`;
-            const apiUrl = `https://api.github.com/repos/${cleanRepo}/contents/js/config.js`;
+            const configApiUrl = `https://api.github.com/repos/${cleanRepo}/contents/js/config.js`;
+            const indexApiUrl = `https://api.github.com/repos/${cleanRepo}/contents/index.html`;
             const authHeader = token.startsWith('ghp_') ? `token ${token}` : `Bearer ${token}`;
 
-            let currentSha = null;
+            let configSha = null;
             try {
-                const getRes = await fetch(`${apiUrl}?ref=${branch}`, {
+                const getRes = await fetch(`${configApiUrl}?ref=${branch}`, {
                     headers: {
                         'Authorization': authHeader,
                         'Accept': 'application/vnd.github.v3+json'
@@ -3533,26 +3912,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (getRes.ok) {
                     const getData = await getRes.json();
-                    currentSha = getData.sha;
+                    configSha = getData.sha;
                 }
             } catch (e) {
                 if (e.message === "Bad credentials") throw e;
-                console.warn('Could not fetch existing SHA:', e);
+                console.warn('Could not fetch existing config SHA:', e);
             }
 
-            const newSource = generateConfigJsSource();
-            const b64Content = btoa(unescape(encodeURIComponent(newSource)));
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            const versionStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
+            const newSource = generateConfigJsSource(versionStamp);
+            
+            function safeUtf8ToBase64(str) {
+                try {
+                    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                } catch (e) {
+                    return btoa(unescape(encodeURIComponent(str)));
+                }
+            }
+
+            function safeBase64ToUtf8(b64) {
+                try {
+                    const binStr = atob(b64.replace(/\s/g, ''));
+                    const bytes = new Uint8Array(binStr.length);
+                    for (let i = 0; i < binStr.length; i++) {
+                        bytes[i] = binStr.charCodeAt(i);
+                    }
+                    return new TextDecoder('utf-8').decode(bytes);
+                } catch (e) {
+                    return decodeURIComponent(escape(atob(b64.replace(/\s/g, ''))));
+                }
+            }
+
+            const b64Config = safeUtf8ToBase64(newSource);
 
             const commitPayload = {
-                message: `chore: update portfolio content from admin panel [${new Date().toLocaleDateString('ar-EG')}]`,
-                content: b64Content,
+                message: `chore: publish portfolio updates from admin panel [${now.toLocaleDateString('ar-EG')} ${timeStr}]`,
+                content: b64Config,
                 branch: branch
             };
-            if (currentSha) {
-                commitPayload.sha = currentSha;
+            if (configSha) {
+                commitPayload.sha = configSha;
             }
 
-            const putRes = await fetch(apiUrl, {
+            const putRes = await fetch(configApiUrl, {
                 method: 'PUT',
                 headers: {
                     'Authorization': authHeader,
@@ -3567,21 +3974,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errData.message || `HTTP ${putRes.status}`);
             }
 
+            // Also bust cache in index.html on GitHub Pages so visitors get updates immediately without cached files
+            try {
+                const getIndexRes = await fetch(`${indexApiUrl}?ref=${branch}`, {
+                    headers: {
+                        'Authorization': authHeader,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (getIndexRes.ok) {
+                    const indexData = await getIndexRes.json();
+                    const indexSha = indexData.sha;
+                    const rawIndex = safeBase64ToUtf8(indexData.content);
+                    const updatedIndex = rawIndex
+                        .replace(/src=["']js\/(config|main|translations|analytics)\.js(\?v=[^"']*)?["']/g, (m, scriptName) => `src="js/${scriptName}.js?v=${versionStamp}"`)
+                        .replace(/href=["']css\/style\.css(\?v=[^"']*)?["']/g, `href="css/style.css?v=${versionStamp}"`);
+
+                    if (updatedIndex !== rawIndex) {
+                        const b64Index = safeUtf8ToBase64(updatedIndex);
+                        await fetch(indexApiUrl, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': authHeader,
+                                'Accept': 'application/vnd.github.v3+json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `chore: update cache buster query string [v${versionStamp}]`,
+                                content: b64Index,
+                                branch: branch,
+                                sha: indexSha
+                            })
+                        });
+                    }
+                }
+            } catch (idxErr) {
+                console.warn('Index cache-bust skip:', idxErr);
+            }
+
             if (feedback) {
                 feedback.style.background = 'rgba(16, 185, 129, 0.15)';
                 feedback.style.border = '1px solid var(--admin-emerald)';
                 feedback.style.color = '#10b981';
                 feedback.innerHTML = `
-                    <i class="fa-solid fa-circle-check"></i> 🚀 تم نشر التحديثات إلى مستودع GitHub Pages بنجاح!
+                    <i class="fa-solid fa-circle-check"></i> 🚀 <strong>تم النشر وتحديث موقعك على GitHub بنجاح!</strong>
                     <br>
-                    <span style="font-size:0.82rem; color:var(--admin-muted);">يقوم GitHub الآن ببناء الموقع وسيتحدث الرابط العام لكل زوار العالم خلال 30 ثانية.</span>
+                    <span style="font-size:0.83rem; color:var(--admin-muted);">
+                        تم تحديث البيانات وتفريغ الكاش لجميع الأجهزة — التعديل سيظهر لجميع زوار موقعك خلال 30 ثانية.
+                    </span>
                     <br>
-                    <a href="https://${username}.github.io/${repo}/" target="_blank" style="color:var(--admin-blue); text-decoration:underline; font-size:0.85rem; margin-top:0.4rem; display:inline-block;">
-                        فتح رابط موقعك المباشر على GitHub Pages <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <a href="https://${username}.github.io/${repo}/" target="_blank" style="color:var(--admin-blue); text-decoration:underline; font-size:0.86rem; margin-top:0.4rem; display:inline-block; font-weight:700;">
+                        فتح رابط موقعك المباشر الآن <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                 `;
             }
-            showToast('🚀 تم نشر الموقع وتحديث كود GitHub بنجاح!');
+            showToast('🚀 تم نشر التعديل على موقعك في GitHub بنجاح!');
         } catch (err) {
             console.error('GitHub publish error:', err);
             let userMsg = err.message;
@@ -3603,6 +4050,130 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
         }
+    }
+
+    function saveSpecificSection(sec) {
+        if (sec === 'profileCard') {
+            const logoTextInput = document.getElementById('logoText');
+            const logoBadgeInput = document.getElementById('logoBadge');
+            const logoImgUrlInput = document.getElementById('logoImgUrl');
+            const favImgUrlInput = document.getElementById('favImgUrl');
+            const profAvatar = document.getElementById('profAvatar');
+            const profCover = document.getElementById('profCover');
+            const profNameAr = document.getElementById('profNameAr');
+            const profNameEn = document.getElementById('profNameEn');
+            const profRoleAr = document.getElementById('profRoleAr');
+            const profRoleEn = document.getElementById('profRoleEn');
+            const profExpYears = document.getElementById('profExpYears');
+            const profWorkStatus = document.getElementById('profWorkStatus');
+            const profAvailabilityText = document.getElementById('profAvailabilityText');
+            const profBioAr = document.getElementById('profBioAr');
+            const profBioEn = document.getElementById('profBioEn');
+
+            if (!siteConfig.profile) siteConfig.profile = {};
+            if (logoTextInput) siteConfig.profile.logoText = logoTextInput.value.trim() || "CREATIVE";
+            if (logoBadgeInput) siteConfig.profile.logoBadge = logoBadgeInput.value.trim() || "PORTFOLIO";
+            if (logoImgUrlInput) siteConfig.profile.logoImgUrl = logoImgUrlInput.value.trim();
+            
+            const chosenFav = favImgUrlInput?.value.trim() || siteConfig.profile.faviconUrl || "img/favicon.svg";
+            siteConfig.profile.faviconUrl = chosenFav;
+            if (!siteConfig.branding) siteConfig.branding = {};
+            siteConfig.branding.faviconUrl = chosenFav;
+            if (typeof applyFavicon === 'function') applyFavicon(chosenFav);
+
+            if (profAvatar) siteConfig.profile.avatarUrl = profAvatar.value.trim();
+            if (profCover) siteConfig.profile.coverUrl = profCover.value.trim();
+            if (profNameAr) siteConfig.profile.nameAr = profNameAr.value.trim();
+            if (profNameEn) siteConfig.profile.nameEn = profNameEn.value.trim();
+            if (profRoleAr) siteConfig.profile.roleAr = profRoleAr.value.trim();
+            if (profRoleEn) siteConfig.profile.roleEn = profRoleEn.value.trim();
+            if (profExpYears) siteConfig.profile.expYears = parseInt(profExpYears.value || 4, 10);
+            if (profWorkStatus) siteConfig.profile.workStatus = profWorkStatus.value;
+            if (profAvailabilityText) {
+                siteConfig.profile.availabilityText = profAvailabilityText.value.trim();
+                siteConfig.profile.statusTextAr = profAvailabilityText.value.trim();
+            }
+            if (profBioAr) siteConfig.profile.bioAr = profBioAr.value.trim();
+            if (profBioEn) siteConfig.profile.bioEn = profBioEn.value.trim();
+
+            saveSiteConfig(siteConfig);
+        } else if (sec === 'branding') {
+            const btnSaveBranding = document.getElementById('btnSaveBranding');
+            if (btnSaveBranding) btnSaveBranding.click();
+            else saveSiteConfig(siteConfig);
+        } else if (sec === 'pricing') {
+            const btnSavePricing = document.getElementById('btnSavePricing');
+            if (btnSavePricing) btnSavePricing.click();
+            else saveSiteConfig(siteConfig);
+        } else if (sec === 'profile') {
+            const btnSaveProfile = document.getElementById('btnSaveProfile');
+            if (btnSaveProfile) btnSaveProfile.click();
+            else saveSiteConfig(siteConfig);
+        } else if (sec === 'projects') {
+            const pendingTitle = document.getElementById('newTitle')?.value.trim();
+            const pendingUrl = document.getElementById('newUrl')?.value.trim();
+            if (pendingTitle && pendingUrl && addProjectForm) {
+                if (typeof addProjectForm.requestSubmit === 'function') {
+                    addProjectForm.requestSubmit();
+                } else {
+                    addProjectForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                }
+            }
+            saveSiteProjects(currentProjects);
+        } else if (sec === 'tutorials') {
+            saveSiteTutorials(currentTutorials);
+        } else if (sec === 'store') {
+            saveSiteProducts(currentProducts);
+        } else if (sec === 'navbar') {
+            saveSiteConfig(siteConfig);
+        } else if (sec === 'sectionsVisibility') {
+            saveSiteConfig(siteConfig);
+        } else if (sec === 'reviews') {
+            saveSiteReviews(currentReviews);
+        }
+    }
+
+    function initUniversalTabPublishers() {
+        document.querySelectorAll('.btn-publish-section-github').forEach(btn => {
+            if (btn.dataset.bound) return;
+            btn.dataset.bound = "true";
+            btn.addEventListener('click', async () => {
+                const sec = btn.getAttribute('data-section');
+                const feedbackEl = document.getElementById('feedback_' + sec);
+                saveSpecificSection(sec);
+                await publishToGitHub(feedbackEl);
+            });
+        });
+
+        document.querySelectorAll('.btn-save-section-local').forEach(btn => {
+            if (btn.dataset.bound) return;
+            btn.dataset.bound = "true";
+            btn.addEventListener('click', () => {
+                const sec = btn.getAttribute('data-section');
+                const feedbackEl = document.getElementById('feedback_' + sec);
+                saveSpecificSection(sec);
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                    feedbackEl.style.border = '1px solid var(--admin-emerald)';
+                    feedbackEl.style.color = '#10b981';
+                    feedbackEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> 💾 <strong>تم الحفظ بنجاح في ذاكرة المتصفح!</strong> لن يُنشر على الإنترنت إلا بعد الضغط على "نشر وحفظ فورياً على GitHub".';
+                    setTimeout(() => { feedbackEl.style.display = 'none'; }, 6000);
+                }
+                showToast('💾 تم الحفظ محلياً في المتصفح بنجاح!');
+            });
+        });
+
+        document.querySelectorAll('.btn-export-section-config').forEach(btn => {
+            if (btn.dataset.bound) return;
+            btn.dataset.bound = "true";
+            btn.addEventListener('click', () => {
+                const sec = btn.getAttribute('data-section');
+                saveSpecificSection(sec);
+                downloadConfigJs();
+                showToast('📥 تم تحميل وتصدير ملف config.js لجهازك!');
+            });
+        });
     }
 
     function renderDeployManager() {
@@ -3691,6 +4262,13 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSectionsVisibilityManager();
     } catch (e) {
         console.error("Initial renderSectionsVisibilityManager error:", e);
+    }
+
+    try {
+        loadGhSettings();
+        initUniversalTabPublishers();
+    } catch (e) {
+        console.error("Initial initUniversalTabPublishers error:", e);
     }
 
     checkSessionOnLoad();

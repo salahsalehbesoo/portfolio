@@ -7,15 +7,16 @@
 const translations = {
     ar: {
         nav: {
-            brand: 'CREATIVE<span class="brand-badge">PORTFOLIO</span>',
+            brand: 'CREATIVE<span class="brand-badge pro-badge">PRO</span>',
             bento: 'الرئيسية',
             showcase: 'الأعمال',
             tutorials: 'الدروس والمقالات',
             store: 'متجر القوالب',
             calculator: 'حاسبة الأسعار',
             reviews: 'التقييمات',
+            contact: 'تواصل معي',
             faq: 'الأسئلة',
-            whatsappCta: 'محادثة واتساب'
+            whatsappCta: 'تواصل واتساب'
         },
         hero: {
             badge: 'متاح الآن لمشاريع جديدة',
@@ -149,15 +150,16 @@ const translations = {
     },
     en: {
         nav: {
-            brand: 'CREATIVE<span class="brand-badge">PORTFOLIO</span>',
+            brand: 'CREATIVE<span class="brand-badge pro-badge">PRO</span>',
             bento: 'Home',
             showcase: 'Work',
             tutorials: 'Tutorials & Blog',
             store: 'Templates Store',
             calculator: 'Pricing Studio',
             reviews: 'Reviews',
+            contact: 'Contact Me',
             faq: 'FAQ',
-            whatsappCta: 'Chat on WhatsApp'
+            whatsappCta: 'Contact WhatsApp'
         },
         hero: {
             badge: 'Available for New Projects',

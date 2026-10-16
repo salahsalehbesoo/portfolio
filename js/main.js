@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             if (brandLogoText) brandLogoText.textContent = prof.logoText || "CREATIVE";
-            if (brandLogoBadge) brandLogoBadge.textContent = prof.logoBadge || "PORTFOLIO";
+            if (brandLogoBadge) brandLogoBadge.textContent = prof.logoBadge || "PRO";
             if (mobileBrandLogoText) mobileBrandLogoText.textContent = prof.logoText || "CREATIVE";
-            if (mobileBrandLogoBadge) mobileBrandLogoBadge.textContent = prof.logoBadge || "PORTFOLIO";
+            if (mobileBrandLogoBadge) mobileBrandLogoBadge.textContent = prof.logoBadge || "PRO";
         }
 
         if (navWaCta && prof.whatsapp) {
@@ -212,6 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTheme = theme;
         localStorage.setItem('site_theme', theme);
         bodyEl.className = theme === 'light' ? 'theme-light' : 'theme-dark';
+        const icon = document.getElementById('themeToggleIcon');
+        if (icon) {
+            if (theme === 'light') {
+                icon.className = 'fa-solid fa-lightbulb';
+                icon.style.color = '#f59e0b';
+            } else {
+                icon.className = 'fa-regular fa-lightbulb';
+                icon.style.color = '#ffffff';
+            }
+        }
     }
 
     // Apply Language
@@ -223,6 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const langLabel = document.getElementById('currentLangLabel');
         if (langLabel) langLabel.textContent = lang === 'ar' ? 'EN' : 'عربي';
+
+        const navWaArrow = document.getElementById('navWaArrow');
+        if (navWaArrow) {
+            navWaArrow.className = lang === 'ar' ? 'fa-solid fa-arrow-left' : 'fa-solid fa-arrow-right';
+        }
 
         // Translate all data-i18n elements
         if (typeof translations !== 'undefined' && translations[lang]) {
@@ -446,8 +461,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const m2 = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             gdriveId = (m1 && m1[1]) || (m2 && m2[1]);
             if (gdriveId) {
-                // Direct high-performance stream URL without Google Drive's iframe watermark or intrusive mobile overlays
-                cleanUrl = `https://drive.usercontent.google.com/download?id=${gdriveId}&export=download`;
+                // Direct high-performance inline stream without Google Drive's iframe watermark or intrusive mobile overlays
+                cleanUrl = `https://drive.usercontent.google.com/download?id=${gdriveId}&export=open`;
                 isDirectVideo = true;
             }
         } else if (cleanUrl.includes('youtube.com/watch?v=')) {
@@ -475,13 +490,25 @@ document.addEventListener('DOMContentLoaded', () => {
             videoEl.playsInline = true;
             videoEl.setAttribute('playsinline', '');
             videoEl.setAttribute('webkit-playsinline', '');
+            videoEl.setAttribute('x5-playsinline', '');
+            videoEl.setAttribute('controlsList', 'nodownload noplaybackrate');
+            videoEl.preload = 'metadata';
             videoEl.className = `lightbox-video-frame ${!isVert ? 'widescreen-frame' : ''}`;
             videoEl.style.objectFit = 'contain';
 
-            // Seamless fallback to preview iframe if direct streaming fails
+            // Clean fallback handling for Google Drive streams
             if (gdriveId) {
+                let hasRetried = false;
                 videoEl.onerror = () => {
-                    console.warn('Direct stream failed, falling back to Google Drive preview iframe');
+                    if (!hasRetried) {
+                        hasRetried = true;
+                        // Retry with direct google drive usercontent
+                        videoEl.src = `https://drive.google.com/uc?export=open&id=${gdriveId}`;
+                        videoEl.load();
+                        videoEl.play().catch(() => {});
+                        return;
+                    }
+                    console.warn('Direct stream failed, falling back to clean preview');
                     lightboxPlayerContainer.innerHTML = '';
                     const fallbackIframe = document.createElement('iframe');
                     fallbackIframe.src = `https://drive.google.com/file/d/${gdriveId}/preview`;
@@ -494,6 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             lightboxPlayerContainer.appendChild(videoEl);
+            videoEl.play().catch(() => {});
         } else {
             const iframe = document.createElement('iframe');
             iframe.src = cleanUrl;

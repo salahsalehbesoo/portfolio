@@ -17,10 +17,10 @@
         rel="stylesheet">
 
     <!-- Stylesheet (Local First for Zero Latency) -->
-    <link rel="stylesheet" href="css/style.css?v=20261016_184911">
+    <link rel="stylesheet" href="css/style.css?v=20261016_232000">
 
     <!-- Configuration & Central Data Store (Synchronous head load for zero-FOUC and instant mobile hydration) -->
-    <script src="js/config.js?v=20261016_184911"></script>
+    <script src="js/config.js?v=20261016_232000"></script>
 
     <!-- Font Awesome Icons 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -209,35 +209,32 @@
     <div class="floating-navbar-wrapper">
         <header class="navbar-pill">
             <a href="index.html" class="nav-brand" id="brandLogoLink">
-                <span id="brandLogoText">CREATIVE</span><span class="brand-badge" id="brandLogoBadge">PORTFOLIO</span>
+                <span id="brandLogoText">CREATIVE</span><span class="brand-badge pro-badge" id="brandLogoBadge">PRO</span>
             </a>
 
             <nav class="nav-links-desktop" id="dynamicNavContainer">
-                <a href="#bento" data-i18n="nav.bento">الرئيسية</a>
                 <a href="#portfolio" data-i18n="nav.showcase">الأعمال</a>
-                <a href="tutorials.html" data-i18n="nav.tutorials">الدروس والمقالات</a>
-                <a href="store.html" data-i18n="nav.store">متجر القوالب</a>
                 <a href="#calculator" data-i18n="nav.calculator">حاسبة الأسعار</a>
                 <a href="#reviews" data-i18n="nav.reviews">التقييمات</a>
-                <a href="#faq" data-i18n="nav.faq">الأسئلة</a>
+                <a href="#footerNavBrand" data-i18n="nav.contact">تواصل معي</a>
             </nav>
 
-            <div class="nav-controls">
-                <!-- Theme Toggle -->
-                <button class="btn-icon-toggle" id="themeToggleBtn" aria-label="Toggle Theme" title="تبديل الثيم">
-                    <i class="fa-solid fa-circle-half-stroke"></i>
-                </button>
+            <div class="nav-controls-capsule">
+                <!-- Direct WhatsApp CTA Pill with Arrow (matching Image 3) -->
+                <a href="https://wa.me/201028076694" target="_blank" rel="noopener noreferrer" class="nav-whatsapp-pill" id="navWaCta">
+                    <i class="fa-solid fa-arrow-left" id="navWaArrow"></i>
+                    <span data-i18n="nav.whatsappCta">تواصل واتساب</span>
+                </a>
 
                 <!-- Language Toggle -->
-                <button class="btn-icon-toggle lang-btn" id="langToggleBtn" aria-label="Toggle Language" title="تغيير اللغة">
+                <button class="nav-control-circle lang-btn" id="langToggleBtn" aria-label="Toggle Language" title="تغيير اللغة">
                     <span id="currentLangLabel">EN</span>
                 </button>
 
-                <!-- Direct WhatsApp CTA -->
-                <a href="https://wa.me/201028076694" target="_blank" rel="noopener noreferrer" class="btn-pill-cta" id="navWaCta">
-                    <i class="fa-brands fa-whatsapp"></i>
-                    <span data-i18n="nav.whatsappCta">واتساب</span>
-                </a>
+                <!-- Theme Toggle with Lightbulb Icon (matching Image 3) -->
+                <button class="nav-control-circle" id="themeToggleBtn" aria-label="Toggle Theme" title="تبديل الثيم">
+                    <i class="fa-regular fa-lightbulb" id="themeToggleIcon"></i>
+                </button>
 
                 <!-- Mobile Menu Hamburger Button -->
                 <button type="button" class="btn-mobile-nav-toggle" id="btnOpenMobileNav" aria-label="Open Menu">
@@ -849,9 +846,9 @@
     </a>
 
     <!-- Scripts -->
-    <script src="js/translations.js?v=20261016_184911"></script>
-    <script src="js/analytics.js?v=20261016_184911"></script>
-    <script src="js/main.js?v=20261016_184911"></script>
+    <script src="js/translations.js?v=20261016_232000"></script>
+    <script src="js/analytics.js?v=20261016_232000"></script>
+    <script src="js/main.js?v=20261016_232000"></script>
 </body>
 
 </html>
