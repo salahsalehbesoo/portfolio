@@ -3,8 +3,8 @@
  * Pro Portfolio - Core Configuration & Central Data Store (Production Build)
  * ============================================================================
  * Generated via Pro Control Panel for GitHub Pages & Static Deployment.
- * Last updated: 2026-10-15T14:42:21.027Z
- * Config Version: 20261015_1742
+ * Last updated: 2026-10-17T00:05:41.613Z
+ * Config Version: 20261017_030541
  * 
  * ⚠️ هذا الملف مولَّد تلقائيًا من لوحة التحكم — لا تعدّله يدويًا.
  * جميع بياناتك مخبوزة مباشرة هنا وستظهر على كل الأجهزة بشكل موحّد.
@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
     CONFIG_VER: 'pro_portfolio_config_version'
 };
 
-const CONFIG_VERSION = "20261017_025500";
+const CONFIG_VERSION = "20261017_030541";
 
 // Auto-invalidate stale localStorage on any device — fixes mobile/desktop data mismatch
 (function enforceConfigVersion() {
@@ -855,10 +855,6 @@ function verifyLicense() {
 
     if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') {
         return { status: 'dev_unlocked', allowFooter: true };
-    }
-
-    if (currentHost === 'salahsalehbesoo.github.io' || (currentHost && currentHost.endsWith('.salahsalehbesoo.github.io'))) {
-        return { status: 'licensed', allowFooter: true };
     }
 
     const authorized = config.security.authorizedDomains || [];
